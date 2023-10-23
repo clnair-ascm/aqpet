@@ -1,0 +1,50 @@
+#' Load Multiple RDS Files into a Named List
+#'
+#' This function reads all `.rds` files located in a specified directory into a named list,
+#' where each list item corresponds to the content of one `.rds` file.
+#'
+#' @param params A list that contains configuration parameters for reading the `.rds` files.
+#' It should include the following elements:
+#' \itemize{
+#'   \item `data_dir`: A character string specifying the directory where the `.rds` files are located.
+#' }
+#'
+#' @details
+#' The function first corrects the directory separator to ensure compatibility across different platforms.
+#' It then lists all the `.rds` files present in the specified directory.
+#' Each `.rds` file is read and stored as an item in a list, with the names of the list items corresponding
+#' to the base filenames of the `.rds` files (without the extension).
+#'
+#' @return A named list where each item contains the content of one `.rds` file.
+#' The names of the list items correspond to the base filenames of the `.rds` files (without the extension).
+#'
+#' @author [Yuqing Dai]
+#'
+#' @examples
+#' \dontrun{
+#' # Assume there are two .rds files in the "data/" directory: "file1.rds" and "file2.rds".
+#' params <- list(data_dir = "data/")
+#' result <- read_rds(params)
+#' print(names(result))  # Should output: "file1" "file2"
+#'}
+#'
+#' @seealso
+#' \code{\link[base]{readRDS}}, \code{\link[tools]{file_path_sans_ext}}
+#'
+#' @export
+#'
+read_rds <- function(params) {
+
+  # Correct directory separator
+  params$data_dir <- gsub("\\\\", "/", params$data_dir)
+
+  # List all .rds files in the specified directory
+  rds_files <- list.files(params$data_dir, pattern = "\\.rds$", full.names = TRUE)
+
+  # Use lapply to read each RDS file into a list
+  rds_list <- lapply(rds_files, readRDS)
+
+  names(rds_list) <- tools::file_path_sans_ext(basename(rds_files))
+
+  return(rds_list)
+}
