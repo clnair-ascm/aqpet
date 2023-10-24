@@ -1,4 +1,15 @@
-#' Set Global Parameters
+#' Parameters setting function
+#'
+#' The function is for setting Parameters: 
+#' 1. Set Global Parameters. 
+#' 2. Set Weather Normalization Parameters
+#' 3. Set Weather Normalization Parameters
+#'
+#' @author [Yuqing Dai, Chengxu Tong]
+#'
+#'
+#'
+#' 1. Set Global Parameters
 #' @param data_dir The directory where the data files are stored.
 #' @param file_pattern The pattern to match for data files.
 #' @param datetime_format The format of the datetime in the data files.
@@ -20,7 +31,7 @@ setGP <- function(data_dir = ".",
               wenormed = wenormed))
 }
 
-#' Set Weather Normalization Parameters
+#' 2. Set Weather Normalization Parameters
 #' @param response_variable The response variable in the analysis.
 #' @param predictor_variables A vector of predictor variables.
 #' @param constant_variables A vector of constant variables.
@@ -78,7 +89,7 @@ setWeNorm <- function(response_variable = "no2",
               window = window))
 }
 
-#' Set Synthetic Control Parameters
+#' 3. Set Synthetic Control Parameters
 #' @param treatment_group A vector of treatment group cities.
 #' @param start_time The start time for the analysis.
 #' @param end_time The end time for the analysis.
