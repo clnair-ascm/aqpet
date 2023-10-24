@@ -33,17 +33,17 @@ setGP <- function(data_dir = ".",
 
 #' 2. Set Weather Normalization Parameters
 #' @param response_variable The response variable in the analysis.
-#' @param predictor_variables A vector of predictor variables.
-#' @param constant_variables A vector of constant variables.
+#' @param predictor_variables A vector of predictor variables, time variables, and Weather variables. 
+#' @param constant_variables A vector of constant variables, time variables or Weather variables, based on the wenorm_method selected.
 #' @param miss_data_treat The method to treat missing data.
 #' @param split_proportion The proportion of data to be used for training.
 #' @param split_by_time Logical, whether to split data by time.
 #' @param seed The seed for reproducibility.
 #' @param max_models The maximum number of models to be trained.
 #' @param max_runtime_secs The maximum runtime in seconds.
-#' @param wenorm_method The method for weather normalization.
+#' @param wenorm_method The method for weather normalization, Can be 'default' or 'revised'.
 #' @param num_iterations The number of iterations for training.
-#' @param algorithm The machine learning algorithm to be used.
+#' @param algorithm The machine learning algorithm to be used, Can be '','','' or ''.
 #' @param criterion The criterion for model selection.
 #' @param write_out Logical, whether to write out the results.
 #' @param kill_h2o Logical, whether to shut down the H2O cluster.
@@ -90,7 +90,7 @@ setWeNorm <- function(response_variable = "no2",
 }
 
 #' 3. Set Synthetic Control Parameters
-#' @param treatment_group A vector of treatment group cities.
+#' @param treatment_group A vector of treatment group cities (sites).
 #' @param start_time The start time for the analysis.
 #' @param end_time The end time for the analysis.
 #' @param buffer_time The buffer time for the analysis.
