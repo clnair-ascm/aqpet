@@ -14,7 +14,7 @@
 #'
 #' @return Returns a list of dataframes with the estimated effects.
 #'
-#' @author [Yuqing Dai]
+#' @author [Yuqing Dai, Chengxu Tong]
 #'
 #' @examples
 #' \dontrun{
@@ -36,7 +36,7 @@ a_scm <- function(df, params, cpd = FALSE, window = 10) {
   library(tidyr)
   library(dplyr)
 
-  # If cdt is TRUE, calculate smoothed residuals
+  # If cpd is TRUE, calculate smoothed residuals
   if (cpd) {
     library(bsts)
     # Helper function to find optimal window size for smoothing
