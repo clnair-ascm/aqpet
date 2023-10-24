@@ -13,6 +13,7 @@
 #' }
 #'
 #' @export
+#' Selected your preferred CRAN mirror URL, default is "https://cran.ma.imperial.ac.uk/"
 load_envir <- function(mirror_url = "https://cran.ma.imperial.ac.uk/") {
 
   #' Set the repository option
