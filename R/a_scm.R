@@ -12,7 +12,7 @@
 #' @param df Data frame containing the raw data.
 #' @param params List of parameters. Contains the treatment_group and start_time.
 #'
-#' @return Returns a list of dataframes with the estimated effects.
+#' @return Returns a list of dataframes with the estimated effects and upper/lower bound, and average effect.
 #'
 #' @author [Yuqing Dai, Chengxu Tong]
 #'
