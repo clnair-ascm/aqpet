@@ -5,7 +5,7 @@
 #'
 #' @param mirror_url A character string specifying the preferred CRAN mirror URL.
 #'
-#' @author [Yuqing Dai]
+#' @author [Yuqing Dai, Chengxu Tong]
 #'
 #' @examples
 #' \dontrun{
@@ -38,7 +38,8 @@ load_envir <- function(mirror_url = "https://cran.ma.imperial.ac.uk/") {
     }
     library(package, character.only = TRUE)
   })
-  #' devtools::install_github("ebenmichael/augsynth")
+  #' Install package augsynth for ASCM
+  devtools::install_github("ebenmichael/augsynth")
   library(augsynth)
 }
 #'
