@@ -19,7 +19,7 @@
 #' @return A list of Global Control Panel parameters.
 setGP <- function(data_dir = ".",
                       file_pattern = "*.csv",
-                      datetime_format = "%d/%m/%Y %H:%M",
+                      datetime_format = "%Y-%m-%d %H:%M:%S",
                       dependent_variable = "no2",
                       data_timerange = c("2018-01-01", "2019-12-31"),
                       wenormed = FALSE) {
