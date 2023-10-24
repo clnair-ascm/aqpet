@@ -14,7 +14,7 @@
 #' @importFrom dplyr mutate row_number
 #' @importFrom lubridate year month day hour yday wday
 #'
-#' @author [Yuqing Dai]
+#' @author [Yuqing Dai, Chengxu Tong]
 #'
 #' @examples
 #' \dontrun{
