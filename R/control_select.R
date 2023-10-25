@@ -33,13 +33,13 @@
 #'     end_time = as.POSIXct(90, origin = "1970-01-01")
 #' )
 #'
-#' result <- treat_select(data, params = parameters, time_resolution = "day")
+#' result <- control_select(data, params = parameters, time_resolution = "day")
 #' print(result$prob)
 #' }
 #'
 #' @export
 #'
-treat_select <- function(df,
+control_select <- function(df,
                          params,
                          time_resolution = NULL,
                          ...) {
