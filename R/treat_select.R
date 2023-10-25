@@ -1,14 +1,14 @@
 #' Process, Aggregate, and Analyze Data based on User-Defined Parameters
 #'
 #' This function performs a series of operations on a data frame, which include:
-#' 1. Removing specific columns based on a treatment group.
+#' 1. Removing specific columns based on a control group.
 #' 2. Time-based aggregation.
 #' 3. Bayesian Change Point (BCP) analysis for each non-datetime column.
 #' 4. Reshaping the output to wide format for both posterior probabilities and means.
 #'
 #' @param df A data.frame: the input data set.
 #' @param params A list containing user-defined parameters including:
-#'     - `treatment_group`: a vector specifying which columns/groups to remove from the data.
+#'     - `control_group`: a vector specifying which columns/groups to remove from the data.
 #'     - `start_time` and `end_time`: used to filter the resulting data based on a datetime range.
 #' @param time_resolution A character string indicating the desired time resolution for aggregation (e.g., "day", "hour"). If NULL, no time aggregation is applied.
 #' @param ... Additional arguments (currently not used).
@@ -28,7 +28,7 @@
 #' )
 #'
 #' parameters <- list(
-#'     treatment_group = c("B"),
+#'     control_group = c("B"),
 #'     start_time = as.POSIXct(10, origin = "1970-01-01"),
 #'     end_time = as.POSIXct(90, origin = "1970-01-01")
 #' )
@@ -45,15 +45,15 @@ treat_select <- function(df,
                          ...) {
   # Function to handle default x-vars
   handle_default_xvars  <- function() {
-    # If treatment_group is NULL or doesn't exist in params or is entirely NA
-    if (!"treatment_group" %in% names(params) || is.null(params$treatment_group) || all(is.na(params$treatment_group))) {
+    # If control_group is NULL or doesn't exist in params or is entirely NA
+    if (!"control_group" %in% names(params) || is.null(params$control_group) || all(is.na(params$control_group))) {
       return(df)
     }
-    # Clean the treatment_group vector to remove NAs
-    clean_treatment_group <- na.omit(params$treatment_group)
+    # Clean the control_group vector to remove NAs
+    clean_control_group <- na.omit(params$control_group)
 
     # Construct the pattern string for grep
-    pattern <- paste(clean_treatment_group, collapse = "|")
+    pattern <- paste(clean_control_group, collapse = "|")
     # Identify the columns to drop
     cols_to_drop <- grep(pattern, colnames(df), value = TRUE)
     # Drop the columns and return the modified data frame
