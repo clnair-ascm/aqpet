@@ -2,7 +2,7 @@
 #'
 #' This function processes and builds models using the `wenorm` method based on provided parameters.
 #'
-#' @param df A list of data frames to process.
+#' @param mylist A list of data frames to process.
 #' @param params A list of parameters specifying details like predictor variables, output directory, wenorm method, etc.
 #' @param start_index The index at which to start processing the list of data frames. Default is 1.
 #' @param end_index The index at which to end processing the list of data frames. If NULL, it defaults to the length of the input list.
@@ -13,7 +13,7 @@
 #' @importFrom purrr compact
 #' @importFrom base tryCatch Sys.time
 #'
-#' @author [Yuqing Dai]
+#' @author [Yuqing Dai, Chengxu Tong]
 #'
 #' @examples
 #' \dontrun{
@@ -23,7 +23,7 @@
 #'
 #' @export
 #'
-buildMod <- function(df,
+buildMod <- function(mylist,
                      params,
                      start_index = 1,
                      end_index = NULL,
@@ -31,7 +31,7 @@ buildMod <- function(df,
 
   suppressWarnings({
 
-    df_new  <- list_na_rm(df[[1]], col_names = params$predictor_variables)
+    df_new  <- list_na_rm(mylist[[1]], col_names = params$predictor_variables)
 
     start_time <- Sys.time()
 
