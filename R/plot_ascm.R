@@ -44,7 +44,7 @@
 #'   variable2 = rnorm(240)
 #' )
 #'
-#' plot_mlscm(df, y_variable = c("variable1", "variable2"), highlight = "variable1", start_times = c("2020-01-03 00:00"), end_times = c("2020-01-07 23:00"))
+#' plot_ascm(df, y_variable = c("variable1", "variable2"), highlight = "variable1", start_times = c("2020-01-03 00:00"), end_times = c("2020-01-07 23:00"))
 #' }
 #'
 #' @export
