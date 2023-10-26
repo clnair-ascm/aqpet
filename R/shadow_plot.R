@@ -1,4 +1,4 @@
-#' Function to show missing value
+#' Function to plot and show missing value
 #'
 #' shadow_plot
 #'
@@ -28,7 +28,7 @@
 #' Default is "Not Missing".
 #' @return A ggplot object representing the shadow plot.
 #'
-#' @author [Yuqing Dai]
+#' @author [Yuqing Dai, Chengxu Tong]
 #'
 #' @examples
 # df <- data.frame(
