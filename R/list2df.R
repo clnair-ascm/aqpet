@@ -8,7 +8,7 @@
 #'
 #' @return Returns a consolidated data frame.
 #'
-#' @author [Your Name or Your Team's Name]
+#' @author [Yuqing Dai, Chengxu Tong]
 #'
 #' @examples
 #' \dontrun{
