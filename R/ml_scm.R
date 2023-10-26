@@ -20,15 +20,15 @@
 #' A list containing the processed dataframe, differences between observed and predicted values, efficiency,
 #' and the machine learning model used.
 #'
-#' @author [Yuqing Dai]
+#' @author [Yuqing Dai, Chengxu Tong]
 #'
 #' @examples
 #' \dontrun{
 #' # Create a sample dataframe
 #' df <- data.frame(
 #'   datetime = seq(from = as.POSIXct("2020-01-01"), to = as.POSIXct("2020-01-10"), by = "hour"),
-#'   metric1 = rnorm(240),
-#'   metric2 = rnorm(240)
+#'   metric1 = rnorm(217),
+#'   metric2 = rnorm(217)
 #' )
 #'
 #' # Define params list
