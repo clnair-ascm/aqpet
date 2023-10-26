@@ -1,4 +1,4 @@
-#' Remove Data Frames with Specified Columns All NA
+#' Remove Data Frames with Specified Columns which is All NA
 #'
 #' This function processes a list of data frames and removes any data frame
 #' that contains specified columns with all NA values.
