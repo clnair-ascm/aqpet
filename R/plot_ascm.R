@@ -34,7 +34,7 @@
 #'
 #' @return A ggplot or plotly object, invisibly.
 #'
-#' @author [Yuqing Dai]
+#' @author [Yuqing Dai, Chengxu Tong]
 #'
 #' @examples
 #' \dontrun{
