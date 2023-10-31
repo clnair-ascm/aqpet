@@ -156,7 +156,7 @@ mod_stats <- function(mydata, mod = "mod", obs = "obs",
 
   # If stats is "default", output all other parameters
   if ("default" %in% stats) {
-    stats <- c("n","FAC2","r","IOAr","RMSE","RMSEu","RMSEr")
+    stats <- c("n","FAC2","r","IOAr","RMSE","RMSEu","RMSEs")
   }
 
   # Calculate the requested statistics
