@@ -165,7 +165,7 @@ run_wenorm <- function(df,
     )
 
     if (model_params$kill_h2o) {
-      h2o.shutdown(prompt = FALSE)
+      h2o.shutdown(prompt = TRUE)
     }
 
   return(list(df_wenorm  = df_wenorm,
