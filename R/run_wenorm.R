@@ -102,7 +102,7 @@ run_wenorm <- function(df,
                                 )
 
               my_df_wn <- wenorm(my_df,
-                                 mod = aml_AQ[[1]],
+                                 model = aml_AQ[[1]],
                                  response_variable = model_params$response_variable,
                                  predictor_variables = model_params$predictor_variables,
                                  constant_variables = model_params$constant_variables,
@@ -132,7 +132,7 @@ run_wenorm <- function(df,
               )
 
               my_df_wn <- wenorm(my_df,
-                                 mod = aml_AQ[[1]],
+                                 model = aml_AQ[[1]],
                                  response_variable = model_params$response_variable,
                                  predictor_variables = model_params$predictor_variables,
                                  constant_variables = model_params$constant_variables,
