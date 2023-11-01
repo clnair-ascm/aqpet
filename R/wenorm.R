@@ -28,7 +28,7 @@ wenorm <- function(data,
                    constant_variables = NULL,
                    num_iterations = 1,
                    seed = NULL,
-                   cdp = T,
+                   cpd = T,
                    window = 10,
                    ...) {
 
@@ -139,8 +139,8 @@ wenorm <- function(data,
   summary_data4 <- summary_data3
 
   #' Step 2
-  # If cdp is TRUE, calculate smoothed residuals
-  if (cdp) {
+  # If cpd is TRUE, calculate smoothed residuals
+  if (cpd) {
     # Load necessary libraries
     library(bsts)
 
