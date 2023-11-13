@@ -90,18 +90,18 @@ mod_explain <- function(model, data,
 
   # source("mod_stats.R")
   # Initialize an empty list to hold the output
-  plot_list <- list()
+  output_list <- list()
 
   # For each selected plot type
   for (plot in output) {
     switch(plot,
            "residual_analysis" = {
-             plot_list$residual_analysis <- h2o.residual_analysis_plot(model, data)
+             output_list$residual_analysis <- h2o.residual_analysis_plot(model, data)
            },
            "varimp" = {
              varimp_df <- h2o.varimp(model)
              varimp_df$variable <- with(varimp_df, reorder(variable, scaled_importance))
-             plot_list$varimp <- ggplot(varimp_df, aes(x = variable, y = scaled_importance)) +
+             output_list$varimp <- ggplot(varimp_df, aes(x = variable, y = scaled_importance)) +
                geom_bar(stat = "identity", fill = "steelblue") +
                coord_flip() +
                labs(x = "Variable", y = "Importance") +
@@ -109,25 +109,25 @@ mod_explain <- function(model, data,
                theme(axis.text = element_text(hjust = 1))
            },
            "shap_summary" = {
-             plot_list$shap_summary <- h2o.shap_summary_plot(model, data)
+             output_list$shap_summary <- h2o.shap_summary_plot(model, data)
            },
            "shap_explain_row" = {
              if (is.null(row_index)) {
                stop("A row index must be provided for SHAP explain row plot.")
              }
-             plot_list$shap_explain_row <- h2o.shap_explain_row_plot(model, data, row_index = row_index, plot_type = plot_type)
+             output_list$shap_explain_row <- h2o.shap_explain_row_plot(model, data, row_index = row_index, plot_type = plot_type)
            },
            "pdp" = {
              if (is.null(column)) {
                stop("A column name must be provided for partial dependence plot.")
              }
-             plot_list$pdp <- h2o.pd_plot(model, data, column = column, row_index = row_index)
+             output_list$pdp <- h2o.pd_plot(model, data, column = column, row_index = row_index)
            },
            "pdp2" = {
              if (is.null(column)) {
                stop("A column name must be provided for partial dependence plot.")
              }
-             plot_list$pdp2 <- h2o.partialPlot(model, data, cols = column, plot_stddev = plot_stddev)
+             output_list$pdp2 <- h2o.partialPlot(model, data, cols = column, plot_stddev = plot_stddev)
            },
            "ipdp" = {
              if (is.null(column)) {
@@ -135,40 +135,40 @@ mod_explain <- function(model, data,
              }
              require(rgl)
              require(plot3Drgl)
-             plot_list$ipdp <- h2o.partialPlot(model, data, col_pairs_2dpdp = list(column2), row_index = row_index)
+             output_list$ipdp <- h2o.partialPlot(model, data, col_pairs_2dpdp = list(column2), row_index = row_index)
            },
            "ice" = {
              if (is.null(column)) {
                stop("A column name must be provided for individual conditional expectation plot.")
              }
-             plot_list$ice <- h2o.ice_plot(model, data, column = column)
+             output_list$ice <- h2o.ice_plot(model, data, column = column)
            },
            "learning_curve" = {
-             plot_list$learning_curve <- h2o.learning_curve_plot(model)
+             output_list$learning_curve <- h2o.learning_curve_plot(model)
            },
            "h2o_performance" = {
-             plot_list$h2o_performance <- h2o.performance(model, data)
+             output_list$h2o_performance <- h2o.performance(model, data)
            },
            "performance" = {
              eva_df <- cbind(as.data.frame(data), as.data.frame(h2o.predict(model, data)))
-             plot_list$performance <- mod_stats(eva_df, mod = "predict", obs = "y", stats = stats)
+             output_list$performance <- mod_stats(eva_df, mod = "predict", obs = "y", stats = stats)
            },
            "shap_pdp" = {
              if (is.null(column)) {
                stop("A column name must be provided for SHAP partial dependence plot.")
              }
-             plot_list$shap_pdp <- h2o.shap_interaction_plot(model, data, column)
+             output_list$shap_pdp <- h2o.shap_interaction_plot(model, data, column)
            },
            "two_feature_pdp" = {
              if (is.null(column) && is.null(column2)) {
                stop("Two column names must be provided for two-feature partial dependence plot.")
              }
-             plot_list$two_feature_pdp <- h2o.partialPlot(model, data, cols = column, col_pairs_2dpdp = list(column2))
+             output_list$two_feature_pdp <- h2o.partialPlot(model, data, cols = column, col_pairs_2dpdp = list(column2))
            },
            {
              stop(paste("Unsupported plot type:", plot))
            }
     )
   }
-  return(plot_list)
+  return(output_list)
 }
