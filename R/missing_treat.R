@@ -42,15 +42,15 @@
 #'
 #' predictor_variables <- c("D","E","G")
 #'
-#' test <- miss_imp(df, method = "h2o", response_variable = c("A", "B"), predictor_variables = c("D","E","G"), max_runtime_secs = 5, seed = 123, patch_data = T, split_proportion = 0.8)
-#' test1 <- miss_imp(df, method = "mean", response_variable = c("A", "B"))
-#' test2 <- miss_imp(df, method = "rm", response_variable = c("A", "B"))
+#' test <- missing_treat(df, method = "h2o", response_variable = c("A", "B"), predictor_variables = c("D","E","G"), max_runtime_secs = 5, seed = 123, patch_data = T, split_proportion = 0.8)
+#' test1 <- missing_treat(df, method = "mean", response_variable = c("A", "B"))
+#' test2 <- missing_treat(df, method = "rm", response_variable = c("A", "B"))
 #' response_variable <- c("A","B")
 #' }
 #'
 #' @export
 #'
-miss_imp <- function(df,
+missing_treat <- function(df,
                      method = "rm",
                      response_variable = NULL,
                      predictor_variables = NULL,
