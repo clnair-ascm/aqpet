@@ -2,7 +2,7 @@
 #'
 #' Function to Calculate Common Model Evaluation Statistics
 #'
-#'The mod_explain function provides a convenient way to generate a variety of diagnostic plots and statistics for a model. It uses the h2o library for model fitting and evaluation, and ggplot2 for creating visually appealing charts. The function can generate several different plots, including residual analysis, variable importance, SHAP (SHapley Additive exPlanations) summary, SHAP explain row, partial dependence, interactive partial dependence, individual conditional expectation (ICE), learning curve, and two-feature partial dependence plots.
+#'The mod_explain function provides a convenient way to generate a variety of diagnostic output and statistics for a model. It uses the h2o library for model fitting and evaluation, and ggplot2 for creating visually appealing charts. The function can generate several different output, including residual analysis, variable importance, SHAP (SHapley Additive exPlanations) summary, SHAP explain row, partial dependence, interactive partial dependence, individual conditional expectation (ICE), learning curve, and two-feature partial dependence output.
 #'
 #' The arguments for the function are:
 #'
@@ -10,7 +10,7 @@
 #'
 #' data: The data frame used for generating explanations. This can be your training or test dataset.
 #'
-#' plots: The types of plots you want to generate. This is a vector of character strings, where each string represents a different plot type. The default setting includes several types of plots.
+#' output: The types of output you want to generate. This is a vector of character strings, where each string represents a different plot type. The default setting includes several types of output.
 #'
 #' stats: The statistical method used for evaluating the performance of the model. The default is "default".
 #'
@@ -24,11 +24,11 @@
 #'
 #' ...: Additional parameters passed to other functions.
 #'
-#' The function then iterates over each type of plot specified in the plots argument, checks if the relevant plot can be generated given the input parameters, and if so, generates the plot and stores it in a list. The function finally returns this list of generated plots.
+#' The function then iterates over each type of plot specified in the output argument, checks if the relevant plot can be generated given the input parameters, and if so, generates the plot and stores it in a list. The function finally returns this list of generated output.
 #'
-#' The mod_explain function is quite versatile and can help you understand the predictions of your model in different ways. By looking at these plots and statistics, you can get a better sense of which features are most important in your model, how these features affect predictions, and whether the model is under or overfitting the data.
+#' The mod_explain function is quite versatile and can help you understand the predictions of your model in different ways. By looking at these output and statistics, you can get a better sense of which features are most important in your model, how these features affect predictions, and whether the model is under or overfitting the data.
 #'
-#' Note: Some plots require additional parameters like column, column2, and row_index. These need to be provided explicitly when needed.
+#' Note: Some output require additional parameters like column, column2, and row_index. These need to be provided explicitly when needed.
 #'
 #' This function also sources another R script (mod_stats.R). Make sure that the mod_stats.R file is available in your working directory, and it contains the mod_stats() function used for generating the performance statistics.
 #'
@@ -62,10 +62,10 @@
 #                      seed = 1234)
 
 # Use the function:
-# mod_explain(gbm_model, test, plots = c("ipdp"), column2 = c("Sepal.Width", "Petal.Length"), row_index = 10)
+# mod_explain(gbm_model, test, output = c("ipdp"), column2 = c("Sepal.Width", "Petal.Length"), row_index = 10)
 #'
 mod_explain <- function(model, data,
-                        plots = c("residual_analysis", "varimp", "shap_summary",
+                        output = c("residual_analysis", "varimp", "shap_summary",
                                   "shap_explain_row", "pdp",
                                   "ice", "ipdp", "pdp2",
                                   "learning_curve", "h2o_performance", "performance", "shap_pdp",
@@ -89,11 +89,11 @@ mod_explain <- function(model, data,
   }
 
   # source("mod_stats.R")
-  # Initialize an empty list to hold the plots
+  # Initialize an empty list to hold the output
   plot_list <- list()
 
   # For each selected plot type
-  for (plot in plots) {
+  for (plot in output) {
     switch(plot,
            "residual_analysis" = {
              plot_list$residual_analysis <- h2o.residual_analysis_plot(model, data)
