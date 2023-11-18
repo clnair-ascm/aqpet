@@ -118,7 +118,7 @@ plot_tsvat2 <- function(df,
     summarise(values = mean(values, na.rm = TRUE), .groups = "drop")
 
   # Highlight certain variables if specified
-  df_long$highlight <- ifelse(df_long$variable %in% highlight, "Treat", "Control")
+  df_long$highlight <- ifelse(df_long$variable %in% highlight, "treated_units", "control_units")
 
   # Ensure that the highlighted lines are plotted on top
   df_long <- df_long %>%
@@ -128,9 +128,9 @@ plot_tsvat2 <- function(df,
   p <- ggplot(df_long, aes(x = datetime, y = values, group = variable)) +
     geom_line(aes(linetype = highlight, size = highlight, color = highlight)) +
     labs(title = title, subtitle = subtitle, x = xlab, y = ylab, color = "Variable") +
-    scale_color_manual(values = c("Control" = "grey", "Treat" = "red")) +
-    scale_linetype_manual(values = c("Control" = "solid", "Treat" = "solid")) +
-    scale_size_manual(values = c("Control" = 1, "Treat" = 1)) +
+    scale_color_manual(values = c("control_units" = "grey", "treated_units" = "red")) +
+    scale_linetype_manual(values = c("control_units" = "solid", "treated_units" = "solid")) +
+    scale_size_manual(values = c("control_units" = 1, "treated_units" = 1)) +
     theme_bw() +
     theme(legend.title = element_text(size = 12 * text_size),
           legend.text = element_text(size = 10 * text_size),
