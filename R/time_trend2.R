@@ -38,12 +38,12 @@
 #' data <- data.frame(datetime = as.POSIXct(c("2022-01-01", "2022-01-02", "2022-01-03", "2022-01-04", "2022-01-05")),
 #'                    value1 = c(1, 2, 3, 4, 5),
 #'                    value2 = c(5, 4, 3, 2, 1))
-#' plot_tsvat2(data, y_variable = c("value1", "value2"), highlight = "value2")
+#' time_trend2(data, y_variable = c("value1", "value2"), highlight = "value2")
 #'}
 #'
 #' @export
 #'
-plot_tsvat2 <- function(df,
+time_trend2 <- function(df,
                             y_variable = NULL,
                             highlight = NULL,
                             x_range = NULL,
