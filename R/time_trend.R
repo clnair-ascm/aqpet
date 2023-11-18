@@ -195,7 +195,7 @@ time_trend <- function(df,
 #' )
 #'
 #' #' Call the plot_timeseries function
-#' plot_timeseries(df,
+#' time_trend(df,
 #'                 y_variable = c("metric1", "metric2", "metric3"),
 #'                 time_resolution = "day",
 #'                 start_time = as.POSIXct("2020-01-04"),
