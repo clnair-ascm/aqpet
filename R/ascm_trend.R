@@ -49,7 +49,7 @@
 #'
 #' @export
 #'
-plot_ascm <- function(df,
+ascm_trend <- function(df,
                               y_variable = NULL,
                               x_range = range(df$datetime, na.rm = TRUE),
                               start_times = NULL,
