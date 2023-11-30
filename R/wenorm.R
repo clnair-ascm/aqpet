@@ -90,13 +90,13 @@ wenorm <- function(data,
   # Combine all data frames into one
   final_data1 <- dplyr::bind_rows(randomized_dfs1) %>%
     as.h2o() %>%
-    h2o.predict(model, .) %>%
+    h2o::h2o.predict(model, .) %>%
     as.data.frame() %>%
     cbind(., bind_rows(randomized_dfs1))
 
   final_data2 <- dplyr::bind_rows(randomized_dfs2) %>%
     as.h2o() %>%
-    h2o.predict(model, .) %>%
+    h2o::h2o.predict(model, .) %>%
     as.data.frame() %>%
     cbind(., bind_rows(randomized_dfs2))
 
