@@ -116,7 +116,7 @@ autoMod <- function(df,
   final_model <- h2o::h2o.get_best_model(auto_ml, algorithm = algorithm, criterion = criterion)
 
   # Predict
-  predictions <- h2o.predict(object = final_model, newdata = testing_data)
+  predictions <- h2o::h2o.predict(object = final_model, newdata = testing_data)
 
   # Get leaderboard
   leaderboard_df <- h2o::h2o.get_leaderboard(object = auto_ml, extra_columns = "ALL")
