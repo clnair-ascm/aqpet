@@ -153,7 +153,7 @@ run_wenorm <- function(df,
     aqmod_data <- aml_AQ[[3]]
     aqmod_stat <- data.frame(mod_explain(model = aml_AQ[[1]],
                                          data = aml_AQ[[3]],
-                                         plots = c("performance"),
+                                         output = c("performance"),
                                          stats = c("n","FAC2","FB", "r","RMSE","RMSEs","RMSEu","IOA","IOAr")))
     leaderboard <- aml_AQ[[5]]
 
