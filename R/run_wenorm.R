@@ -69,7 +69,7 @@ run_wenorm <- function(df,
     switch (model_params$wenorm_method,
             "aml" = {
               my_df <- df_new %>%
-                miss_imp(method = model_params$miss_data_treat, response_variable = model_params$response_variable) %>%
+                missing_treat(method = model_params$miss_data_treat, response_variable = model_params$response_variable) %>%
                 add_date_cols(date_col = datetime, stats = "all")
 
               aml_AQ <- autoMod(my_df, response_variable = model_params$response_variable,
@@ -85,7 +85,7 @@ run_wenorm <- function(df,
 
             "default" = {
               my_df <- df_new %>%
-                miss_imp(method = "rm",
+                missing_treat(method = "rm",
                          response_variable = model_params$response_variable) %>%
                 add_date_cols(date_col = datetime, stats = "all")
 
@@ -115,7 +115,7 @@ run_wenorm <- function(df,
 
             "revised" = {
               my_df <- df_new %>%
-                miss_imp(method = "rm",
+                missing_treat(method = "rm",
                          response_variable = model_params$response_variable) %>%
                 add_date_cols(date_col = datetime, stats = "all")
 
