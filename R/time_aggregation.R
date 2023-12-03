@@ -37,36 +37,36 @@
 #' @export
 #'
 time_aggregation <- function(df, time_resolution = NULL, ...) {
-
+  
   # Early return if no time resolution is provided
   if (is.null(time_resolution)) {
     return(df)
   }
-
+  
   # Convert datetime column to POSIXct only if it's not already
   if (!inherits(df$datetime, "POSIXct")) {
     df$datetime <- as.POSIXct(df$datetime)
   }
-
+  
   # Check for wind speed and direction columns
   has_wind_components <- all(c("ws", "wd") %in% names(df))
-
+  
   # Calculate u and v components if needed
   if (has_wind_components) {
     df <- df %>%
       mutate(u = ws * cos(pi / 180 * wd),
              v = ws * sin(pi / 180 * wd))
   }
-
+  
   # Group and summarize data
   df <- df %>%
     group_by(datetime = floor_date(datetime, time_resolution)) %>%
     summarise(across(
-      .cols = if (has_wind_components) -c(datetime, wd, ws, u, v) else everything(),
+      .cols = everything(),
       .fns = \(x) mean(x, na.rm = TRUE),
       .names = if (has_wind_components) "mean_{.col}" else "{.col}"
     ))
-
+  
   # Additional calculations for wind components
   if (has_wind_components) {
     df <- df %>%
@@ -74,16 +74,16 @@ time_aggregation <- function(df, time_resolution = NULL, ...) {
              wd = (atan2(mean_v, mean_u) * 180 / pi + 360) %% 360) %>%
       select(-mean_u, -mean_v)
   }
-
+  
   # Rename columns if needed
   if (has_wind_components) {
     cols_to_rename <- setdiff(names(df), c("datetime", "ws", "wd"))
     new_names <- gsub("^mean_", "", cols_to_rename)
     names(df)[names(df) %in% cols_to_rename] <- new_names
   }
-
+  
   # Convert back to data frame if it's a tibble
   df <- as.data.frame(df)
-
+  
   return(df)
 }
