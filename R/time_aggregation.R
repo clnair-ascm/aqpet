@@ -38,39 +38,51 @@
 #'
 time_aggregation <- function(df, time_resolution = NULL, ...) {
 
-  # If no time resolution is provided, return the original data
+  # Early return if no time resolution is provided
   if (is.null(time_resolution)) {
     return(df)
   }
 
-  df$datetime <- as.POSIXct(df$datetime)
+  # Convert datetime column to POSIXct only if it's not already
+  if (!inherits(df$datetime, "POSIXct")) {
+    df$datetime <- as.POSIXct(df$datetime)
+  }
 
-  if ("ws" %in% names(df) & "wd" %in% names(df)) {
-    # Convert wind direction and speed to u and v components
+  # Check for wind speed and direction columns
+  has_wind_components <- all(c("ws", "wd") %in% names(df))
+
+  # Calculate u and v components if needed
+  if (has_wind_components) {
     df <- df %>%
-      mutate(u = ws * cos(pi/180 * wd),
-             v = ws * sin(pi/180 * wd)) %>%
-      group_by(datetime = floor_date(datetime, time_resolution)) %>%
-      summarise(across(-c(datetime, wd, ws, u, v), \(x) mean(x, na.rm = TRUE), .names = "mean_{.col}"),
-                u_avg = mean(u, na.rm = TRUE),
-                v_avg = mean(v, na.rm = TRUE),
-                ws = sqrt(u_avg^2 + v_avg^2),
-                wd = (atan2(v_avg, u_avg) * 180/pi + 360) %% 360) %>%
-      ungroup() %>%
-      select(-u_avg, -v_avg)
+      mutate(u = ws * cos(pi / 180 * wd),
+             v = ws * sin(pi / 180 * wd))
+  }
 
-    # Rename columns to remove the 'mean_' prefix for columns other than wd and ws
+  # Group and summarize data
+  df <- df %>%
+    group_by(datetime = floor_date(datetime, time_resolution)) %>%
+    summarise(across(
+      .cols = if (has_wind_components) -c(datetime, wd, ws, u, v) else everything(),
+      .fns = \(x) mean(x, na.rm = TRUE),
+      .names = if (has_wind_components) "mean_{.col}" else "{.col}"
+    ))
+
+  # Additional calculations for wind components
+  if (has_wind_components) {
+    df <- df %>%
+      mutate(ws = sqrt(mean_u^2 + mean_v^2),
+             wd = (atan2(mean_v, mean_u) * 180 / pi + 360) %% 360) %>%
+      select(-mean_u, -mean_v)
+  }
+
+  # Rename columns if needed
+  if (has_wind_components) {
     cols_to_rename <- setdiff(names(df), c("datetime", "ws", "wd"))
     new_names <- gsub("^mean_", "", cols_to_rename)
     names(df)[names(df) %in% cols_to_rename] <- new_names
-
-  } else {
-    # Use original mean method
-    df <- df %>%
-      group_by(datetime = floor_date(datetime, time_resolution)) %>%
-      summarise(across(everything(), \(x) mean(x, na.rm = TRUE)))
   }
 
+  # Convert back to data frame if it's a tibble
   df <- as.data.frame(df)
 
   return(df)
