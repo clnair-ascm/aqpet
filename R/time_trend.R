@@ -165,10 +165,9 @@ time_trend <- function(df,
   # )
 
   if (!is.null(start_time))  p <- p + geom_vline(xintercept = as.numeric(start_time), linetype = "dashed", color = "red2", size = line_size)
-
   if (!is.null(end_time))    p <- p + geom_vline(xintercept = as.numeric(end_time), linetype = "dashed", color = "red2", size = line_size)
-
   if (!is.null(buffer_time)) p <- p + geom_vline(xintercept = as.numeric(buffer_time), linetype = "dashed", color = "blue2", size = line_size)
+  if (!is.null(refer_line))  p <- p + geom_hline(yintercept = as.numeric(refer_line), linetype = "dashed", color = "black", size = line_size)
 
   # If plotly option is enabled, convert ggplot to plotly
   if (plotly) {
