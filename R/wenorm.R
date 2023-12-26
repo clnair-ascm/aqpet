@@ -132,7 +132,7 @@ wenorm <- function(data,
 
   summary_data4 <- summary_data1 %>%
     mutate(across(.cols = all_of(new_var_name),
-                  .fns = ~ summary_data1[[response_variable]] - (summary_data1[[new_var_name]] + summary_data2[[new_var_name]]),
+                  .fns = ~ summary_data1[[response_variable]] - (summary_data1[[new_var_name]] - summary_data2[[new_var_name]]),
                   .names = new_var_name))
 
   #' Step 2
