@@ -60,6 +60,7 @@ time_trend <- function(df,
                             ylim = NULL,
                             layer_order = NULL,
                             line_colors = NULL,
+                            refer_line = NULL,
                             ...) {
   # Load required packages
   load_packages <- function() {
