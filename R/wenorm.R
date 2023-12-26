@@ -65,10 +65,7 @@ wenorm <- function(data,
       # Sample the row indices from the original dataframe
       sampled_indices <- sample(1:nrow(data), size = nrow(data), replace = FALSE)
 
-      for (variable in resample_variables) {
-        # Use the sampled indices to select rows from the original dataframe
-        new_data[, variable] <- data[sampled_indices, variable]
-      }
+    new_data[, resample_variables] <- data[sampled_indices, resample_variables]
     return(new_data)
   }
 
@@ -76,6 +73,8 @@ wenorm <- function(data,
     new_data <- data[, c("datetime", response_variable), drop = FALSE]
     # Sample the row indices from the original dataframe
     sampled_indices <- sample(1:nrow(data), size = nrow(data), replace = FALSE)
+
+    new_data[, predictor_variables] <- data[sampled_indices, predictor_variables]
 
     for (variable in predictor_variables) {
       # Use the sampled indices to select rows from the original dataframe
