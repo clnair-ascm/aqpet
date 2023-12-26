@@ -75,11 +75,6 @@ wenorm <- function(data,
     sampled_indices <- sample(1:nrow(data), size = nrow(data), replace = FALSE)
 
     new_data[, predictor_variables] <- data[sampled_indices, predictor_variables]
-
-    for (variable in predictor_variables) {
-      # Use the sampled indices to select rows from the original dataframe
-      new_data[, variable] <- data[sampled_indices, variable]
-    }
     return(new_data)
   }
 
