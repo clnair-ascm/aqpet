@@ -55,12 +55,12 @@ wenorm <- function(data,
 
   #' Step 1
   # Register parallel backend
-  # num_cores <- parallel::detectCores()
-  # cl <- parallel::makeCluster(num_cores)
-  # doParallel::registerDoParallel(cl)
+  num_cores <- parallel::detectCores()
+  cl <- parallel::makeCluster(num_cores)
+  doParallel::registerDoParallel(cl)
 
   # Perform operations in parallel
-  randomized_dfs1 <- foreach(i = 1:num_iterations, .packages = "dplyr") %do% {
+  randomized_dfs1 <- foreach(i = 1:num_iterations, .packages = "dplyr") %dopar% {
     new_data <- data[, c(constant_variables, response_variable), drop = FALSE]
       # Sample the row indices from the original dataframe
       sampled_indices <- sample(1:nrow(data), size = nrow(data), replace = FALSE)
@@ -69,7 +69,7 @@ wenorm <- function(data,
     return(new_data)
   }
 
-  randomized_dfs2 <- foreach(i = 1:num_iterations, .packages = "dplyr") %do% {
+  randomized_dfs2 <- foreach(i = 1:num_iterations, .packages = "dplyr") %dopar% {
     new_data <- data[, c("datetime", response_variable), drop = FALSE]
     # Sample the row indices from the original dataframe
     sampled_indices <- sample(1:nrow(data), size = nrow(data), replace = FALSE)
@@ -79,7 +79,7 @@ wenorm <- function(data,
   }
 
   # Stop the cluster
-  # stopCluster(cl)
+  stopCluster(cl)
 
   # Combine all data frames into one
   final_data1 <- dplyr::bind_rows(randomized_dfs1) %>%
