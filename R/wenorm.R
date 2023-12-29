@@ -78,8 +78,8 @@ wenorm <- function(data,
     return(new_data)
   }
 
-  # Stop the cluster
-  stopCluster(cl)
+  # Clean up
+  parallel::stopCluster(cluster)
 
   # Combine all data frames into one
   final_data1 <- dplyr::bind_rows(randomized_dfs1) %>%
