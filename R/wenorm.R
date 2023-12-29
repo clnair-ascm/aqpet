@@ -54,10 +54,10 @@ wenorm <- function(data,
   }
 
   #' Step 1
-  # Register parallel backend
+  # Set up parallel processing
   num_cores <- parallel::detectCores()
-  cl <- parallel::makeCluster(num_cores)
-  doParallel::registerDoParallel(cl)
+  cluster <- parallel::makeCluster(num_cores)
+  doParallel::registerDoParallel(cluster)
 
   # Perform operations in parallel
   randomized_dfs1 <- foreach(i = 1:num_iterations, .packages = "dplyr") %dopar% {
