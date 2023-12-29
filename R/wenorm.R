@@ -55,7 +55,7 @@ wenorm <- function(data,
 
   #' Step 1
   # Set up parallel processing
-  num_cores <- parallel::detectCores()
+  num_cores <- parallel::detectCores() - 1
   cluster <- parallel::makeCluster(num_cores)
   doParallel::registerDoParallel(cluster)
 
