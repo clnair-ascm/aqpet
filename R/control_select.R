@@ -117,7 +117,7 @@ control_select <- function(df,
 
   list_d <- lapply(1:length(list_p), function(idx) {
     df_tmp <- list_p[[idx]]
-    df_imp <- miss_imp(df = df_tmp, method = "rm", response_variable = non_datetime_cols[idx])
+    df_imp <- missing_treat(df = df_tmp, method = "rm", response_variable = non_datetime_cols[idx])
 
     result <- bcp::bcp(df_imp[, 2])
 
