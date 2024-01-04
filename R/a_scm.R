@@ -116,8 +116,8 @@ a_scm <- function(df, params, cpd = FALSE, window = 10) {
       rename_with(~replace(., length(.), "datetime"))
 
     df_list[[i]]$Effect <- -100 * df_list[[i]]$Estimate / (-df_list[[i]]$Estimate + df_preprocessed[[i]]$y)
-    df_list[[i]]$Effect_lower_bound <- -100 * df_list[[i]]$lower_bound / (-df_list[[i]]$lower_bound + df_preprocessed[[i]]$y)
-    df_list[[i]]$Effect_upper_bound <- -100 * df_list[[i]]$upper_bound / (-df_list[[i]]$upper_bound + df_preprocessed[[i]]$y)
+    df_list[[i]]$Effect_lower_bound <- -100 * df_list[[i]]$lower_bound / (-df_list[[i]]$Estimate + df_preprocessed[[i]]$y)
+    df_list[[i]]$Effect_upper_bound <- -100 * df_list[[i]]$upper_bound / (-df_list[[i]]$Estimate + df_preprocessed[[i]]$y)
     df_list[[i]][1, "average_att"] <- df_list_all[[i]]$average_att[1, 1]
   }
 
