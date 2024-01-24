@@ -43,3 +43,7 @@ Imports:
     rgl,
     rsample,
     zoo
+Remotes:
+    ebenmichael/augsynth,
+    swang87/bcp
+    
