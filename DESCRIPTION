@@ -38,6 +38,7 @@ Imports:
     plot3Drgl,
     purrr,
     readxl,
+    remotes,
     rgl,
     rsample,
     zoo
