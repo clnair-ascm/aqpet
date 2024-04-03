@@ -99,7 +99,8 @@ run_wenorm <- function(df,
                                 max_models = model_params$max_models,
                                 algorithm = model_params$algorithm,
                                 criterion = model_params$criterion,
-                                max_runtime_secs = model_params$max_runtime_secs
+                                max_runtime_secs = model_params$max_runtime_secs,
+                                max_mem_size = model_params$max_mem_size
                                 )
 
               my_df_wn <- wenorm(my_df,
@@ -129,7 +130,8 @@ run_wenorm <- function(df,
                                 max_models = model_params$max_models,
                                 algorithm = model_params$algorithm,
                                 criterion = model_params$criterion,
-                                max_runtime_secs = model_params$max_runtime_secs
+                                max_runtime_secs = model_params$max_runtime_secs,
+                                max_mem_size = model_params$max_mem_size
               )
 
               my_df_wn <- wenorm(my_df,
