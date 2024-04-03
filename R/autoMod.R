@@ -68,7 +68,7 @@ autoMod <- function(df,
                     algorithm           = "gbm",
                     criterion           = "AUTO",
                     seed                = 1234,
-                    max_mem_size        = "12 g"
+                    max_mem_size        = "24 g"
                     ...) {
 
   # Ensure df is a data frame
