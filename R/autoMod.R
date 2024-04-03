@@ -68,6 +68,7 @@ autoMod <- function(df,
                     algorithm           = "gbm",
                     criterion           = "AUTO",
                     seed                = 1234,
+                    max_mem_size        = "12 g"
                     ...) {
 
   # Ensure df is a data frame
@@ -85,7 +86,7 @@ autoMod <- function(df,
   doParallel::registerDoParallel(cluster)
 
   # Start the H2O cluster (locally)
-  h2o::h2o.init(max_mem_size = "12g" )
+  h2o::h2o.init(max_mem_size = max_mem_size)
 
   # Prepare dataframe
   preprocessed_df <- data.frame(processed_df[[1]]) %>% tidyr::drop_na(all_of("y"))
