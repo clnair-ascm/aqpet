@@ -70,7 +70,7 @@ wenorm <- function(data,
   }
 
   randomized_dfs2 <- foreach(i = 1:num_iterations, .packages = "dplyr") %dopar% {
-    new_data <- data[, c("datetime", response_variable), drop = FALSE]
+    new_data <- data[, c("datetime", "trend", response_variable), drop = FALSE]
     # Sample the row indices from the original dataframe
     sampled_indices <- sample(1:nrow(data), size = nrow(data), replace = FALSE)
 
