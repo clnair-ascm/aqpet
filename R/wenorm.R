@@ -70,11 +70,20 @@ wenorm <- function(data,
   }
 
   randomized_dfs2 <- foreach(i = 1:num_iterations, .packages = "dplyr") %dopar% {
-    new_data <- data[, c("datetime", "trend", response_variable), drop = FALSE]
+    # Define the columns to keep. Check if 'trend' column exists and include it if present.
+    cols_to_keep <- c("datetime", response_variable)
+    if ("trend" %in% names(data)) {
+      cols_to_keep <- c(cols_to_keep, "trend")
+    }
+  
+    new_data <- data[, cols_to_keep, drop = FALSE]
+  
     # Sample the row indices from the original dataframe
     sampled_indices <- sample(1:nrow(data), size = nrow(data), replace = FALSE)
-
+  
+    # Shuffle only the predictor variables based on the sampled indices
     new_data[, predictor_variables] <- data[sampled_indices, predictor_variables]
+  
     return(new_data)
   }
 
