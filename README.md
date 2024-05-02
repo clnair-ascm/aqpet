@@ -183,6 +183,7 @@ The function for using the ASCM to construct counterfactual trends for treated u
 
 
 • `data`: A data frame comprising timeseries of weather-normalised data for both treated and control units.
+
 • `params`: A list, which includes a vector of `treatment_group`, as well as `start_time` and `end_time` of the policy intervention. 
 
 ```r
@@ -191,7 +192,7 @@ a_scm (data, params)
 
 ## Model results and visualisation
 
-Based on the _ggplot2_, **aqpet** provides a main function for timeseries plots that suitable for different purposes:
+Based on the `{ggplot2}`, **aqpet** provides a main function for timeseries plots that are suitable for different purposes:
 
 ```r
 time_trend(data, time_resolution = "3 day", highlight = "North_Kensington")
