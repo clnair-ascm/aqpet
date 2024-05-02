@@ -218,15 +218,17 @@ ascm_trend(data, y_variable, add_ribbon = T, start_times)
 
 ## References
 
-- LeDell, E.; Poirier, S.
-  H2o automl: Scalable automatic machine learning. Proceedings of the AutoML Workshop at ICML: ICML; 2020
+- Ben-Michael, E.; Feller, A.; Rothstein, J.
+  The Augmented Synthetic Control Method. Journal of the American Statistical Association; 2021; 116 (536): 1789–1803.
 
 - Grange, S.K.; Carslaw, D.C.; Lewis, A.C.; Boleti, E.; Hueglin, C.
   Random forest meteorological normalisation models for Swiss PM 10 trend analysis. Atmospheric Chemistry and Physics; 2018; 18:6223-6239
 
+- LeDell, E.; Poirier, S.
+  H2o automl: Scalable automatic machine learning. Proceedings of the AutoML Workshop at ICML: ICML; 2020
+
 - Willmott, C.J.; Robeson, S.M.; Matsuura, K.
   A refined index of model performance. International Journal of climatology; 2012; 32:2088-2094
 
-- Ben-Michael, E.; Feller, A.; Rothstein, J.
-  The Augmented Synthetic Control Method. Journal of the American Statistical Association; 2021; 116 (536): 1789–1803.
+
 
