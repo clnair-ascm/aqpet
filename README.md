@@ -93,6 +93,7 @@ print(names(result))  # Should output: "file1" "file2"
 ## Auto-ML and weather normalisation
 
 ### Auto-ML
+
 **aqpet** leverages the capabilities of the H2O automated machine learning (H2O AutoML) engine (LeDell and Poirier, 2020), which provides a comprehensive suite of algorithms and computational tools. The **aqpet** function for building the model is 'autoMod(.)'. 
 
 • 'response_variable'&'predictor_variables': A predictor variable is an independent variable used in statistical models to forecast or predict the values of a dependent response variable.
@@ -182,7 +183,7 @@ The function for using the ASCM to construct counterfactual trends for treated u
 
 
 • 'data': A data frame comprising timeseries of weather-normalised data for both treated and control units.
-• 'params': A list, which includes a vector of 'treatment_group', as well as 'start_time' and 'end_time' of the policy intervention. 
+• 'params': A list, which includes a vector of 'treatment_group', as well as `start_time` and `end_time` of the policy intervention. 
 
 ```r
 a_scm (data, params)
