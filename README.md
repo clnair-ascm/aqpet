@@ -53,19 +53,19 @@ load_envir()
 
 ### Read data set
 
-Function ('read_data') identifies and processes data files from a specific directory. It requires a 'params' argument, a list containing specific key-value pairs. 
+Function ('read_data') identifies and processes data files from a specific directory. It requires a `params` argument, a list containing specific key-value pairs. 
 
-• data_dir: the directory path from which the data files are to be retrieved. The function automatically corrects any backslashes to forward slashes in the path.
+• `data_dir`: the directory path from which the data files are to be retrieved. The function automatically corrects any backslashes to forward slashes in the path.
 
-• 'file_pattern': files stored within the working directory, aqpet supports both the csv and xlsx formats.
+• `file_pattern`: files stored within the working directory, aqpet supports both the csv and xlsx formats.
 
-• 'datetime_format': the format of the 'datetime' column in the files.
+• `datetime_format`: the format of the 'datetime' column in the files.
 
-• 'dependent_variable': the designation for the dependent variable within the dataset generally corresponds to air pollutants. 
+• `dependent_variable`: the designation for the dependent variable within the dataset generally corresponds to air pollutants. 
 
-• 'data_timerange': a vector of two date elements specifying the range of dates to filter the data. It should over enough data (e.g., one year) before and after policy interventions.
+• `data_timerange`: a vector of two date elements specifying the range of dates to filter the data. It should cover enough data (e.g., one year) before and after policy interventions.
 
-• 'wenormed': a logical value indicating if the data has been weather normalised.
+• `wenormed`: a logical value indicating if the data has been weather normalised.
 
 ```r
  params <- list(
@@ -96,13 +96,13 @@ print(names(result))  # Should output: "file1" "file2"
 
 **aqpet** leverages the capabilities of the H2O automated machine learning (H2O AutoML) engine (LeDell and Poirier, 2020), which provides a comprehensive suite of algorithms and computational tools. The **aqpet** function for building the model is 'autoMod(.)'. 
 
-• 'response_variable'&'predictor_variables': A predictor variable is an independent variable used in statistical models to forecast or predict the values of a dependent response variable.
+• `response_variable`&`predictor_variables`: A predictor variable is an independent variable used in statistical models to forecast or predict the values of a dependent response variable.
 
-• 'max_runtime_secs': Setting an upper bound on the model's runtime to ensure computational efficiency.
+• `max_runtime_secs`: Setting an upper bound on the model's runtime to ensure computational efficiency.
 
-• 'max_models': Capping the number of models to be generated. 
+• `max_models`: Capping the number of models to be generated. 
 
-• 'split_proportion': Determining the division of data into training and evaluation subsets.
+• `split_proportion`: Determining the division of data into training and evaluation subsets.
 
 Below is an example that demonstrates how to build a GBM (Gradient Boosting Machine) model for NO2 predictions using time variables (e.g., trend, dow, doy) and meteorological variables including wd, ws, temp, and RH.
 
@@ -119,12 +119,12 @@ autoMod(data,
 ```
 ### Weather normalisation
 
-In the **aqpet**, the weather normalisation adheres to the approach similar to that of Grange et al. (2018), yet it operates independently of the initial model construction phase — once the model is formulated through an automated machine learning procedure (i.e., 'autoMod'), the weather normalisation function takes a step further.
+In the **aqpet**, the weather normalisation adheres to the approach similar to that of Grange et al. (2018), yet it operates independently of the initial model construction phase — once the model is formulated through an automated machine learning procedure (i.e., `autoMod`), the weather normalisation function takes a step further.
 
-This function, denoted as 'wenorm', is executed using the following syntax.
+This function, denoted as `wenorm`, is executed using the following syntax.
 
-• 'constant_variables': Refers to the set of variables that are held fixed throughout the resampling process. 
-• 'num_interations': Specifies the number of resampling iterations. 
+• `constant_variables`: Refers to the set of variables that are held fixed throughout the resampling process. 
+• `num_interations`: Specifies the number of resampling iterations. 
 
 ```r
 wenorm(data, model,
@@ -137,7 +137,7 @@ wenorm(data, model,
 
 To streamline this workflow, the **aqpet** provides an ensemble function to efficiently process data from multiple sites:
 
-• 'list': contains air quality and meteorological data across all sites.
+• `list`: contains air quality and meteorological data across all sites.
 
 ```r
 data_WeNorm < - buildMod(list, params)
@@ -145,13 +145,13 @@ data_WeNorm < - buildMod(list, params)
 
 ## Model performance and interoperability
 
-The 'mod_stats' function offers a set of commonly used numeric model evaluation metrics. While it encompasses model statistics addressed by the openair package 'modStats' function, such as a factor or two (FAC2), normalised mean bias (NMB), root mean squared error (RMSE), the refined index of agreement (IOAr) (Willmott et al., 2012) — it further delineates systematic RMSE and unsystematic RMSE. 
+The `mod_stats` function offers a set of commonly used numeric model evaluation metrics. While it encompasses model statistics addressed by the openair package 'modStats' function, such as a factor or two (FAC2), normalised mean bias (NMB), root mean squared error (RMSE), the refined index of agreement (IOAr) (Willmott et al., 2012) — it further delineates systematic RMSE and unsystematic RMSE. 
 
-• 'mod': A character string specifying the name of the model data column in `mydata`. Default is "mod".
+• `mod`: A character string specifying the name of the model data column in `mydata`. Default is `mod`.
 
-• 'obs': A character string specifying the name of the observed data column in `mydata`. Default is "obs".
+• `obs`: A character string specifying the name of the observed data column in `mydata`. Default is `obs`.
 
-• 'stats': A character vector specifying the evaluation metrics to be computed. Available metrics include "n", "FB", "MG", "FAC2", "VG", "r", "RMSEs", "RMSEu", "RMSE", "COE", "IOA", "IOAr". If "default" is included in `stats` or if `stats` is not provided, all metrics will be computed. Default is "default".
+• `stats`: A character vector specifying the evaluation metrics to be computed. Available metrics include `n`, `FB`,`MG`, `FAC2`, `VG`, `r`, `RMSEs`, `RMSEu`, `RMSE`, `COE`, `IOA`, `IOAr`. If `default` is included in `stats` or if `stats` is not provided, all metrics will be computed. Default is `default`.
 
 
 ```r
@@ -161,11 +161,11 @@ mod_stats(data, mod = "mod", obs = "obs", stats = "default")
 
 The **aqpet** provides the 'mod_explain' function, catering to various analytical requirements. As its core, this function is designed for evaluating and interpreting models, particularly those generated using the H2O framework (LeDell and Poirier, 2020). Here below is an example:
 
-• 'model': The model that you want to explain.
+• `model`: The model that you want to explain.
 
-• 'data': The data frame used for generating explanations. 
+• `data`: The data frame used for generating explanations. 
 
-• 'output': The types of output you want to generate. This is a vector of character strings, where each string represents a different plot type. The default setting includes several types of output.
+• `output`': The types of output you want to generate. This is a vector of character strings, where each string represents a different plot type. The default setting includes several types of output.
   
 ```r
 mod_explain(model, data, output)
@@ -182,8 +182,8 @@ The synthetic control method (SCM) creates a predicted "business-as-usual" or "c
 The function for using the ASCM to construct counterfactual trends for treated units in relation to the control units is:
 
 
-• 'data': A data frame comprising timeseries of weather-normalised data for both treated and control units.
-• 'params': A list, which includes a vector of 'treatment_group', as well as `start_time` and `end_time` of the policy intervention. 
+• `data`: A data frame comprising timeseries of weather-normalised data for both treated and control units.
+• `params`: A list, which includes a vector of `treatment_group`, as well as `start_time` and `end_time` of the policy intervention. 
 
 ```r
 a_scm (data, params)
@@ -191,7 +191,7 @@ a_scm (data, params)
 
 ## Model results and visualisation
 
-Based on the ggplot2, **aqpet** provides a main function for timeseries plots that suitable for different purposes:
+Based on the _ggplot2_, **aqpet** provides a main function for timeseries plots that suitable for different purposes:
 
 ```r
 time_trend(data, time_resolution = "3 day", highlight = "North_Kensington")
@@ -199,7 +199,7 @@ time_trend(data, time_resolution = "3 day", highlight = "North_Kensington")
 
 ![1-s2 0-S1364815224001130-gr3](https://github.com/clnair-ascm/aqpet/assets/43085757/1c0782b2-25be-4d55-a50b-9c2903af23fe)
 
-Timeseries data of NO2 concentrations at monitoring sites across the UK. (a) Observed concentration; (b) Weather-normalised concentration. The red dashed line in each panel indicates the announcement date of the policy, the blue dashed line indicates the implement date of the policy.
+Timeseries data of NO2 concentrations at monitoring sites across the UK. (a) Observed concentration; (b) Weather-normalised concentration. The red dashed line in each panel indicates the announcement date of the policy, the blue dashed line indicates the implementation date of the policy.
 
 
 The ASCM results can be visualised through a series of plots by using the following function:
@@ -209,7 +209,7 @@ ascm_trend(data, y_variable, add_ribbon = T, start_times)
 ```
 ![1-s2 0-S1364815224001130-gr4_lrg](https://github.com/clnair-ascm/aqpet/assets/43085757/ea811d57-a549-495d-ada8-afdf8cbb2a6f)
 
-(a) Weather-normalised NO2 concentrations at North Kensington, London, and its synthetic trend generated from the control unit data. (b) Estimated policy effect of ULEZ on NO2 concentrations (difference in concentration between North Kensington and its synthetic control). (c) Estimated percentage change in NO2 concentration (positive means a decreases in concentration, the intended policy effect) due to ULEZ. The red dashed line in each panel indicates the announcement date of the policy, the blue dashed line indicates the implement date of the policy, and the shaded areas represent the uncertainty.
+(a) Weather-normalised NO2 concentrations at North Kensington, London, and its synthetic trend generated from the control unit data. (b) Estimated policy effect of ULEZ on NO2 concentrations (difference in concentration between North Kensington and its synthetic control). (c) Estimated percentage change in NO2 concentration (positive means a decreases in concentration, the intended policy effect) due to ULEZ. The red dashed line in each panel indicates the announcement date of the policy, the blue dashed line indicates the implementation date of the policy, and the shaded areas represent the uncertainty.
 
 
 #### Please find the published [paper](https://doi.org/10.1016/j.envsoft.2024.106052) for more details.
