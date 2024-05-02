@@ -54,6 +54,7 @@ load_envir()
 ### Read data set
 
 Function ('read_data') identifies and processes data files from a specific directory. It requires a 'params' argument, a list containing specific key-value pairs. 
+
 • data_dir: the directory path from which the data files are to be retrieved. The function automatically corrects any backslashes to forward slashes in the path.
 
 • 'file_pattern': files stored within the working directory, aqpet supports both the csv and xlsx formats.
