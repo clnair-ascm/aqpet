@@ -26,7 +26,7 @@ compute_shap <- function(model, data, top_n_features = 20) {
     mutate(diff = end - start) %>%
     group_by(feature) %>%
     summarise(
-      sum_diff = sum(diff)
+      ave_diff = mean(diff)
     ) %>%
     as.data.frame()
   
