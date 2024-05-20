@@ -108,7 +108,8 @@ a_scm <- function(df, params, cpd = FALSE, window = 10) {
       unixtime,
       data = df_processed[[i]],
       progfunc = "Ridge",
-      scm = TRUE
+      scm = TRUE,
+      fixedeff = FALSE,
     ) %>% summary(inf_type = "jackknife+")
 
     df_list[[i]] <- df_list_all[[i]]$att %>%
