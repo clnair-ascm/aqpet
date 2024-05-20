@@ -29,7 +29,7 @@
 #'
 #' @export
 #'
-a_scm <- function(df, params, cpd = FALSE, window = 10) {
+a_scm <- function(df, params, cpd = FALSE, fixedeff = FALSE, window = 10) {
 
   # Load necessary libraries
   library(augsynth)
@@ -109,7 +109,7 @@ a_scm <- function(df, params, cpd = FALSE, window = 10) {
       data = df_processed[[i]],
       progfunc = "Ridge",
       scm = TRUE,
-      fixedeff = FALSE,
+      fixedeff = fixedeff,
     ) %>% summary(inf_type = "jackknife+")
 
     df_list[[i]] <- df_list_all[[i]]$att %>%
