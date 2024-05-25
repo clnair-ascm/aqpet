@@ -1,5 +1,3 @@
-##
-##
 compute_shap <- function(model, data, top_n_features = 20) {
   # Get the number of rows in the data
   n_rows <- nrow(data)
