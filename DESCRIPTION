@@ -24,7 +24,6 @@ Suggests:
     rmarkdown
 VignetteBuilder: knitr
 Imports: 
-    agua,
     bsts,
     changepoint,
     devtools,
