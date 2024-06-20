@@ -32,9 +32,9 @@
 a_scm <- function(df, params, cpd = FALSE, fixedeff = FALSE, window = 10) {
 
   # Load necessary libraries
-  library(augsynth)
-  library(tidyr)
-  library(dplyr)
+  # library(augsynth)
+  # library(tidyr)
+  # library(dplyr)
 
   # If cpd is TRUE, calculate smoothed residuals
   if (cpd) {
