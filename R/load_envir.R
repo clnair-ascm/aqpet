@@ -21,7 +21,7 @@ load_envir <- function(mirror_url = "https://cran.ma.imperial.ac.uk/") {
   options(timeout = 600)
   #'
   required_packages <- c(
-    "bcp", "bsts",
+    "bsts",
     "changepoint", "devtools",
     "doParallel", "dplyr",
     "foreach", "h2o",
@@ -30,7 +30,7 @@ load_envir <- function(mirror_url = "https://cran.ma.imperial.ac.uk/") {
     "purrr", "readxl",
     "rgl", "rsample",
     "tidymodels", "tidyverse",
-    "zoo", "agua"
+    "zoo"
   )
 
   sapply(required_packages, function(package) {
@@ -41,7 +41,9 @@ load_envir <- function(mirror_url = "https://cran.ma.imperial.ac.uk/") {
   })
   #' Install package augsynth for ASCM
   devtools::install_github("ebenmichael/augsynth")
+    devtools::install_github("swang87/bcp")
   library(augsynth)
+  library(bcp)
 }
 #'
 load_envir()
