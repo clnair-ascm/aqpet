@@ -42,8 +42,8 @@ load_envir <- function(mirror_url = "https://cran.ma.imperial.ac.uk/") {
   #' Install package augsynth for ASCM
   devtools::install_github("ebenmichael/augsynth")
     devtools::install_github("swang87/bcp")
-  library(augsynth)
-  library(bcp)
+  # library(augsynth)
+  # library(bcp)
 }
 #'
 load_envir()
