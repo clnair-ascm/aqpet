@@ -41,7 +41,4 @@ Imports:
     rgl,
     rsample,
     zoo
-Remotes:
-    github::ebenmichael/augsynth,
-    github::swang87/bcp
     
