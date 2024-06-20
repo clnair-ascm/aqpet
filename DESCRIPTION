@@ -42,6 +42,6 @@ Imports:
     rsample,
     zoo
 Remotes:
-    ebenmichael/augsynth,
-    swang87/bcp
+    github::ebenmichael/augsynth,
+    github::swang87/bcp
     
