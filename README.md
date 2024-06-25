@@ -21,6 +21,17 @@ Installation of **aqpet** from GitHub is convenient using the `{devtools}` packa
 library(devtools)
 devtools::install_github('clnair-ascm/aqpet')
 library(aqpet)
+load_envir()
+
+# gfortran must be installed for 'bcp' package
+on macOS:
+brew install gcc
+mkdir -p ~/.R
+nano ~/.R/Makevars
+Add the following lines to the Makevars file. Adjust paths if necessary:
+FC = gfortran
+F77 = gfortran
+FLIBS = -lgfortran
 
 ```
 
