@@ -17,9 +17,9 @@ Program language: R.
 Installation of **aqpet** from GitHub is convenient using the `{devtools}` package.
 
 ``` r
-# install.packages("devtools")
-library(devtools)
-devtools::install_github('clnair-ascm/aqpet')
+# install.packages("pak")
+library(pak)
+pak::pak('clnair-ascm/aqpet')
 library(aqpet)
 load_envir()
 
