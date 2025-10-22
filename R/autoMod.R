@@ -77,22 +77,74 @@ autoMod <- function(df,
   }
 
   # Process dataframe
-  processed_df <- xy_select(df, response_variable = response_variable, predictor_variable = predictor_variables)
-
+  processed_df <- xy_select(df,
+                            response_variable = response_variable,
+                            predictor_variable = predictor_variables)
 
   # Set up parallel processing
   num_cores <- parallel::detectCores() - 1
   cluster <- parallel::makeCluster(num_cores)
   doParallel::registerDoParallel(cluster)
 
-  # Start the H2O cluster (locally)
-  h2o::h2o.init(max_mem_size = max_mem_size)
+  ### =====================================================
+  ### Environment detection and robust H2O initialization
+  ### =====================================================
 
-  # Prepare dataframe
+  # Detect job array ID from any common HPC system
+  env_vars <- c(
+    Sys.getenv("SLURM_ARRAY_TASK_ID", NA),
+    Sys.getenv("PBS_ARRAYID", NA),
+    Sys.getenv("LSB_JOBINDEX", NA),
+    Sys.getenv("SGE_TASK_ID", NA)
+  )
+  task_id <- suppressWarnings(as.numeric(na.omit(env_vars)[1]))
+
+  # Choose port logic based on environment
+  if (is.na(task_id)) {
+    message("💻 Local or non-array environment detected — using default port 54321")
+    base_port <- 54321
+  } else {
+    message("🏗️ HPC array environment detected — task ID:", task_id)
+    base_port <- 54000 + task_id * 2
+  }
+
+  # H2O startup with retry mechanism
+  max_retries <- 3
+  for (try_i in seq_len(max_retries)) {
+    port_use <- base_port + (try_i - 1) * 2
+    cat("Attempt", try_i, "starting H2O on port", port_use, "\n")
+
+    h2o_conn <- try(
+      h2o::h2o.init(
+        ip = "localhost",
+        port = port_use,
+        max_mem_size = max_mem_size,
+        nthreads = num_cores
+      ),
+      silent = TRUE
+    )
+
+    if (!inherits(h2o_conn, "try-error")) {
+      cat("✅ Successfully connected to H2O on port", port_use, "\n")
+      break
+    }
+
+    cat("⚠️  Failed to connect on port", port_use, "— retrying...\n")
+    Sys.sleep(5)
+  }
+
+  if (inherits(h2o_conn, "try-error")) {
+    parallel::stopCluster(cluster)
+    stop("❌ Failed to start H2O after multiple retries.")
+  }
+
+  ### =====================================================
+  ### Data preparation & modeling
+  ### =====================================================
   preprocessed_df <- data.frame(processed_df[[1]]) %>% tidyr::drop_na(all_of("y"))
   set.seed(seed)
 
-  # Split data based on time or randomly
+  # Split data (by time or randomly)
   if (split_by_time) {
     data_split <- rsample::initial_time_split(preprocessed_df, prop = split_proportion, strata = y)
   } else {
@@ -105,13 +157,15 @@ autoMod <- function(df,
 
   predictor_variables <- setdiff(predictor_variables, excluded_variables)
 
-  # Perform AutoML
-  auto_ml <- h2o::h2o.automl(x = predictor_variables,
-                             y = "y",
-                             training_frame = training_data,
-                             max_models = max_models,
-                             max_runtime_secs = max_runtime_secs,
-                             seed = seed)
+  # Run AutoML
+  auto_ml <- h2o::h2o.automl(
+    x = predictor_variables,
+    y = "y",
+    training_frame = training_data,
+    max_models = max_models,
+    max_runtime_secs = max_runtime_secs,
+    seed = seed
+  )
 
   # Select the best model
   final_model <- h2o::h2o.get_best_model(auto_ml, algorithm = algorithm, criterion = criterion)
@@ -119,7 +173,7 @@ autoMod <- function(df,
   # Predict
   predictions <- h2o::h2o.predict(object = final_model, newdata = testing_data)
 
-  # Get leaderboard
+  # Leaderboard
   leaderboard_df <- h2o::h2o.get_leaderboard(object = auto_ml, extra_columns = "ALL")
   leaderboard <- as.data.frame(leaderboard_df)
 
@@ -129,6 +183,8 @@ autoMod <- function(df,
 
   # Clean up
   parallel::stopCluster(cluster)
+  h2o::h2o.shutdown(prompt = FALSE)
+  Sys.sleep(5)
 
   return(result_list)
 }
