@@ -34,7 +34,9 @@ setGP <- function(data_dir = ".",
 #' 2. Set Weather Normalization Parameters
 #' @param response_variable The response variable in the analysis.
 #' @param predictor_variables A vector of predictor variables, time variables, and Weather variables. 
-#' @param constant_variables A vector of constant variables, time variables or Weather variables, based on the wenorm_method selected.
+#' @param constant_variables The subset of `predictor_variables` to hold fixed
+#'   (i.e. NOT resampled) -- should be the time variables, not the weather
+#'   variables, or no weather-normalisation will actually occur.
 #' @param miss_data_treat The method to treat missing data.
 #' @param split_proportion The proportion of data to be used for training.
 #' @param split_by_time Logical, whether to split data by time.
@@ -53,7 +55,8 @@ setGP <- function(data_dir = ".",
 #' @return A list of Weather Normalized Panel parameters.
 setWeNorm <- function(response_variable = "no2",
                               predictor_variables = c("trend", "month", "day", "dow", "doy", "hour", "wd", "ws", "RH", "temp", "sp", "blh"),
-                              constant_variables = c("wd", "ws", "RH", "temp", "sp", "blh"),
+                              # time vars stay fixed; weather vars get resampled (was inverted)
+                              constant_variables = c("trend", "month", "day", "dow", "doy", "hour"),
                               miss_data_treat = "rm",
                               split_proportion = 0.8,
                               split_by_time = FALSE,
