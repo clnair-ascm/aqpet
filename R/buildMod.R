@@ -52,24 +52,50 @@ buildMod <- function(mylist,
         {
           wenorm <- run_wenorm(df = df_new[[i]], model_params = params)
 
-          if(params$write_out) {
-            output_data <- switch(params$wenorm_method,
-                                  "aml"     = wenorm$aqmod,
-                                  "default" = wenorm$df_wenorm,
-                                  "revised" = wenorm$df_final,
-                                  wenorm$df_wenorm  # Default case if none of the above match
+          if (params$write_out) {
+            output_data <- switch(
+              params$wenorm_method,
+              "aml"     = wenorm$aqmod,
+              "default" = wenorm$df_wenorm,
+              "revised" = wenorm$df_final,
+              "TuanVu"  = wenorm$df_wenorm,
+              wenorm$df_wenorm   # default fallback
             )
 
             params$out_dir <- gsub("\\\\", "/", params$out_dir)
 
-            write.csv(wenorm$df_wenorm, paste0(params$out_dir, names(df_new)[[i]], "_", params$response_variable, "_wn.csv"))
-            write.csv(wenorm$df_final, paste0(params$out_dir, names(df_new)[[i]], "_", params$response_variable, "_final.csv"))
+            # Only write tabular weather-normalisation outputs
+            if (params$wenorm_method != "aml") {
+              write.csv(
+                output_data,
+                paste0(
+                  params$out_dir,
+                  names(df_new)[[i]], "_",
+                  params$response_variable,
+                  "_wn.csv"
+                )
+              )
+
+              # df_final == df_wenorm for "TuanVu" -- skip the duplicate write
+              if (params$wenorm_method != "TuanVu") {
+                write.csv(
+                  wenorm$df_final,
+                  paste0(
+                    params$out_dir,
+                    names(df_new)[[i]], "_",
+                    params$response_variable,
+                    "_final.csv"
+                  )
+                )
+              }
+            }
           }
 
           df_list[[i]] <- switch(params$wenorm_method,
                                  "aml"     = wenorm$aqmod,
                                  "default" = wenorm$df_wenorm,
                                  "revised" = wenorm$df_final,
+                                 "TuanVu"  = wenorm$df_wenorm,
                                  wenorm$df_wenorm  # Default case if none of the above match
           )
 

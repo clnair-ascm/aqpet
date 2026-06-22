@@ -1,7 +1,7 @@
 #' Execute Data Preprocessing and Model Training Using Various Methods
 #'
 #' This function preprocesses the provided dataset, handles missing values, and trains a model based on
-#' the method provided in the model parameters. It offers three methods - "aml", "default", and "revised".
+#' the method provided in the model parameters. It offers four methods - "aml", "default", "revised", and "TuanVu".
 #'
 #' @param df A data frame that contains the data to be processed and modeled.
 #' @param model_params A list that provides various model parameters such as the response variable,
@@ -12,7 +12,7 @@
 #' @details
 #' The function starts by checking and converting the response and predictor variables to numeric, if necessary.
 #' It then processes the data based on the method provided in `model_params`. The "aml" method processes
-#' and models the data differently than the "default" and "revised" methods. After preprocessing, the function
+#' and models the data differently than the "default", "revised", and "TuanVu" methods. After preprocessing, the function
 #' utilizes the `autoMod` function to train models, followed by the `wenorm` function to further process
 #' the dataset. The final output includes the trained model and processed datasets.
 #'
@@ -149,7 +149,51 @@ run_wenorm <- function(df,
               df_base     <- data.frame(my_df_wn[[4]][,c("datetime", model_params$response_variable, paste(model_params$response_variable, "_wn", sep =""))])
               df_wenorm   <- data.frame(my_df_wn[[5]][,c("datetime", model_params$response_variable, paste(model_params$response_variable, "_wn", sep =""))])
               df_final    <- my_df_wn[[6]]
+            },
+
+            "TuanVu" = {
+              my_df <- df_new %>%
+                missing_treat(method = "rm",
+                              response_variable = model_params$response_variable) %>%
+                add_date_cols(date_col = datetime, stats = "all")
+
+              aml_AQ <- autoMod(
+                my_df,
+                response_variable   = model_params$response_variable,
+                split_by_time       = model_params$split_by_time,
+                predictor_variables = model_params$predictor_variables,
+                split_proportion    = model_params$split_proportion,
+                seed                = model_params$seed,
+                max_models          = model_params$max_models,
+                algorithm           = model_params$algorithm,
+                criterion           = model_params$criterion,
+                max_runtime_secs    = model_params$max_runtime_secs,
+                max_mem_size        = model_params$max_mem_size
+              )
+
+              my_df_wn <- wenorm(
+                my_df,
+                model               = aml_AQ[[1]],
+                response_variable   = model_params$response_variable,
+                predictor_variables = model_params$predictor_variables,
+                constant_variables  = model_params$constant_variables,
+                num_iterations      = model_params$num_iterations,
+                seed                = model_params$seed,
+                wenorm_method       = "TuanVu",
+                # no baseline/cpd stage for "TuanVu" -- documents that intent here too
+                cpd                 = FALSE
+              )
+
+              df_wenorm <- data.frame(
+                my_df_wn[[3]][, c("datetime",
+                                  model_params$response_variable,
+                                  paste(model_params$response_variable, "_wn", sep = ""))]
+              )
+
+              # keep output structure compatible with buildMod
+              df_final <- df_wenorm
             }
+
     )
 
     aqmod_mod  <- aml_AQ[[1]]

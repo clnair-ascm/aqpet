@@ -43,14 +43,16 @@ setGP <- function(data_dir = ".",
 #' @param seed The seed for reproducibility.
 #' @param max_models The maximum number of models to be trained.
 #' @param max_runtime_secs The maximum runtime in seconds.
-#' @param wenorm_method The method for weather normalization, Can be 'default' or 'revised'.
+#' @param wenorm_method The method for weather normalization. Can be 'default',
+#'   'revised', 'TuanVu' (Vu et al., 2019), or 'aml'.
 #' @param num_iterations The number of iterations for training.
 #' @param algorithm The machine learning algorithm to be used, Can be '','','' or ''.
 #' @param criterion The criterion for model selection.
 #' @param write_out Logical, whether to write out the results.
 #' @param kill_h2o Logical, whether to shut down the H2O cluster.
 #' @param out_dir The output directory.
-#' @param cpd Logical, whether to use change point detection.
+#' @param cpd Logical, whether to use change point detection. Ignored when
+#'   wenorm_method = "TuanVu".
 #' @param window The window size for the analysis.
 #' @return A list of Weather Normalized Panel parameters.
 setWeNorm <- function(response_variable = "no2",
