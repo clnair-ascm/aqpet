@@ -20,6 +20,19 @@
 #'   across randomly chosen rows from the whole series) or "TuanVu" (Vu et
 #'   al. 2019: resample_variables drawn from rows within +/-14 days of year
 #'   and the same hour-of-day; skips the baseline/cpd stages below entirely).
+#'
+#'   Performance note (v0.2.1): for "TuanVu", the original implementation
+#'   recomputed, for every single row, a fresh O(N) distance scan over the
+#'   *entire* series to find its +/-14-day/same-hour candidates -- and did so
+#'   again from scratch on every one of the `num_iterations` Monte Carlo
+#'   passes (O(num_iterations * N^2) overall). This version builds the
+#'   per-row candidate index once, up front, via a per-hour binary search
+#'   (O(N log N) total), then reuses it for every iteration; each iteration
+#'   then draws one sampled row per candidate set and assigns the resampled
+#'   weather columns in a single vectorised operation instead of row-by-row.
+#'   Results are statistically equivalent to the original (same +/-14-day,
+#'   same-hour candidate pool; same fallback rules), just computed far less
+#'   redundantly.
 #' @return A list containing the final_data (all data frames combined) and summary_data (data summarized by datetime).
 #' @export
 #' @examples
@@ -66,40 +79,82 @@ wenorm <- function(data,
   cluster <- parallel::makeCluster(num_cores)
   doParallel::registerDoParallel(cluster)
 
+  # --- "TuanVu" candidate-index precomputation (done once, not per-iteration) ---
+  #
+  # For every row we need all rows that share its hour-of-day and fall within
+  # a circular +/-14-day window of its day-of-year. Build that lookup once
+  # here via a per-hour binary search instead of, as before, re-scanning the
+  # whole series for every row on every Monte Carlo iteration.
+  build_candidate_index <- function(doy, hr) {
+
+    n <- length(doy)
+    idx_all <- seq_len(n)
+    by_hour <- split(idx_all, hr)
+    candidates <- vector("list", n)
+
+    for (rows_h in by_hour) {
+
+      doy_h <- doy[rows_h]
+      ord <- order(doy_h)
+      rows_sorted <- rows_h[ord]
+      doy_sorted  <- doy_h[ord]
+
+      # Triplicate the per-hour timeline (-366, +0, +366) so a circular
+      # +/-14-day window never needs special-casing at the year boundary
+      # (e.g. day 3 correctly matches day 364 of the previous "lap").
+      doy_ext  <- c(doy_sorted - 366, doy_sorted, doy_sorted + 366)
+      rows_ext <- rep(rows_sorted, 3)
+      ord_ext  <- order(doy_ext)
+      doy_ext  <- doy_ext[ord_ext]
+      rows_ext <- rows_ext[ord_ext]
+
+      # +/- 0.5 offsets make the inclusive <= 14 day boundary exact under
+      # findInterval()'s half-open interval semantics.
+      lo_pos <- findInterval(doy_sorted - 14.5, doy_ext) + 1L
+      hi_pos <- findInterval(doy_sorted + 14.5, doy_ext)
+
+      for (k in seq_along(rows_sorted)) {
+        candidates[[rows_sorted[k]]] <- rows_ext[lo_pos[k]:hi_pos[k]]
+      }
+    }
+
+    # Defensive fallbacks mirroring the original row-loop's rules. In
+    # practice every row always matches itself (distance 0 from its own
+    # day-of-year), so these branches should not trigger.
+    empty <- which(lengths(candidates) == 0L)
+    for (row_i in empty) {
+      idx <- which(hr == hr[row_i])
+      if (length(idx) == 0L) idx <- idx_all
+      candidates[[row_i]] <- idx
+    }
+
+    candidates
+  }
+
+  if (identical(wenorm_method, "TuanVu")) {
+
+    work_data <- data
+    work_data$doy <- as.integer(format(work_data$datetime, "%j"))
+    work_data$hr  <- as.integer(format(work_data$datetime, "%H"))
+
+    candidate_idx      <- build_candidate_index(work_data$doy, work_data$hr)
+    new_data_template  <- work_data[, c(constant_variables, response_variable), drop = FALSE]
+  }
+
   randomized_dfs1 <- foreach(iter = 1:num_iterations, .packages = "dplyr") %dopar% {
 
     if (identical(wenorm_method, "TuanVu")) {
 
-      work_data <- data
-      work_data$doy <- as.integer(format(work_data$datetime, "%j"))
-      work_data$hr  <- as.integer(format(work_data$datetime, "%H"))
+      # One sampled candidate row per row, drawn from the precomputed
+      # index, then a single vectorised assignment of the resampled
+      # weather columns (replacing the original's row-by-row
+      # new_data[row_i, ...] <- ... assignment inside an O(N) row loop).
+      sampled_rows <- vapply(candidate_idx, function(idx) {
+        if (length(idx) == 1L) idx else idx[sample.int(length(idx), 1L)]
+      }, integer(1))
 
-      new_data <- work_data[, c(constant_variables, response_variable), drop = FALSE]
-
-      for (row_i in seq_len(nrow(work_data))) {
-
-        target_doy <- work_data$doy[row_i]
-        target_hr  <- work_data$hr[row_i]
-
-        # circular day-of-year distance, so year edges behave sensibly
-        doy_diff <- abs(work_data$doy - target_doy)
-        doy_diff <- pmin(doy_diff, 366 - doy_diff)
-
-        idx <- which(doy_diff <= 14 & work_data$hr == target_hr)
-
-        # fallbacks
-        if (length(idx) == 0) {
-          idx <- which(work_data$hr == target_hr)
-        }
-        if (length(idx) == 0) {
-          idx <- seq_len(nrow(work_data))
-        }
-
-        sampled_row <- sample(idx, 1)
-
-        # replace weather/resampled variables only
-        new_data[row_i, resample_variables] <- work_data[sampled_row, resample_variables]
-      }
+      new_data <- new_data_template
+      new_data[, resample_variables] <- work_data[sampled_rows, resample_variables]
 
       return(new_data)
 
