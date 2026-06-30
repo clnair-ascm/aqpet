@@ -1,3 +1,29 @@
+# aqpet 0.2.3
+
+## Bug fixes
+
+* `wenorm()`'s `seed` argument now actually makes the parallel resampling
+  reproducible. The Monte Carlo resampling iterations run in parallel via
+  `foreach` / `doParallel` (`%dopar%`), but `set.seed(seed)` only seeds the
+  master R process -- it never reaches the worker sessions, which each drew
+  from their own uncontrolled RNG. As a result the same `seed` (or the
+  `setWeNorm()` default `seed = 123`) did not reproduce the same
+  weather-normalised output, and worker streams were not guaranteed
+  independent.
+
+  `wenorm()` now registers a parallel-safe RNG with
+  `doRNG::registerDoRNG(seed)` after setting up the cluster, so the
+  `%dopar%` loops draw from independent L'Ecuyer-CMRG streams assigned
+  per *iteration*. A given `seed` therefore reproduces the same result
+  regardless of the number of CPU cores, and the two resampling loops
+  receive separate, non-overlapping streams. With `seed = NULL` the
+  streams are still parallel-safe, just not reproducible across runs.
+
+## Dependencies
+
+* Adds `doRNG` (Imports) for reproducible parallel random-number
+  generation. Install with `install.packages("doRNG")` when updating.
+
 # aqpet 0.2.2
 
 ## New features

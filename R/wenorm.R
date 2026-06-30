@@ -13,7 +13,15 @@
 #'   variables, or no weather-normalisation will actually occur.
 #' @param num_iterations The number of iterations to perform. Default is 1.
 #' @param enable_diff If set to TRUE, a new column containing the weather difference is added to the output. Default is TRUE.
-#' @param seed Seed for reproducibility. Default is NULL.
+#' @param seed Seed for reproducibility. Default is NULL. The resampling
+#'   iterations run in parallel via \pkg{foreach}/\pkg{doParallel}; from
+#'   v0.2.3 the seed is applied to the parallel workers via \pkg{doRNG}
+#'   (independent per-iteration L'Ecuyer-CMRG streams), so a given seed
+#'   reproduces the same weather-normalised result regardless of the number
+#'   of CPU cores. Previously `set.seed(seed)` only seeded the master
+#'   process and never reached the workers, so the parallel resampling was
+#'   not actually reproducible. Set to NULL for non-reproducible (but still
+#'   parallel-safe) runs.
 #' @param cdp  Logical. If TRUE, smoothed residuals are calculated. Default is FALSE. Ignored when wenorm_method = "TuanVu".
 #' @param window Numeric. Specifies the window size for smoothing. Default is 10.
 #' @param wenorm_method One of "default" (resample_variables reshuffled
@@ -103,12 +111,26 @@ wenorm <- function(data,
   if (!requireNamespace("doParallel", quietly = TRUE)) {
     stop("Package doParallel needed for this function is not installed. Please install it.")
   }
+  if (!requireNamespace("doRNG", quietly = TRUE)) {
+    stop("Package doRNG needed for this function is not installed. Please install it.")
+  }
 
   #' Step 1
   # Set up parallel processing
   num_cores <- parallel::detectCores() - 1
   cluster <- parallel::makeCluster(num_cores)
   doParallel::registerDoParallel(cluster)
+
+  # Reproducible, parallel-safe RNG for the %dopar% resampling loops below.
+  # `set.seed(seed)` above only seeds the master process; the foreach workers
+  # are separate R sessions whose RNG it never reaches, so until now the `seed`
+  # argument did NOT make the parallel resampling reproducible. registerDoRNG()
+  # makes the subsequent %dopar% loops draw from independent L'Ecuyer-CMRG
+  # streams assigned per ITERATION, so results are reproducible for a given
+  # `seed` regardless of how many workers the cluster has, and the two loops
+  # below automatically receive separate, non-overlapping streams. With
+  # seed = NULL the streams are still parallel-safe, just not reproducible.
+  doRNG::registerDoRNG(seed)
 
   # --- "TuanVu" candidate-index precomputation (done once, not per-iteration) ---
   #
