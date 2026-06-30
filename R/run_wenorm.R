@@ -7,6 +7,27 @@
 #' @param model_params A list that provides various model parameters such as the response variable,
 #'                     predictor variables, method for handling missing data, and various parameters
 #'                     for the modeling process.
+#'
+#'                     v0.2.2 adds three optional fields (all back-compatible -- omit them and the
+#'                     behaviour is identical to v0.2.1):
+#'                     \itemize{
+#'                       \item `resample_window` -- integer half-width in days of the day-of-year
+#'                             resampling window (default 14). Governs the `wenorm_method = "TuanVu"`
+#'                             window; accepted-but-unused by the other methods.
+#'                       \item `resample_pool` -- where the TuanVu resampler draws replacement
+#'                             weather from. One of:
+#'                             \itemize{
+#'                               \item `"model"` (default) -- the modelling data itself (v0.2.1 behaviour).
+#'                               \item `"input"` -- the *full* input `df` BEFORE missing-response rows are
+#'                                     dropped. Lets you pass one frame that carries a long meteorological
+#'                                     record alongside a pollutant column that is NA outside the study
+#'                                     period: the model trains on the rows with a pollutant value, but the
+#'                                     resampling pool keeps every row with valid weather.
+#'                               \item a data frame -- a *separate* meteorological record (e.g. a multi-year
+#'                                     MET pool). Must contain a `datetime` column and every resampled
+#'                                     weather column.
+#'                             }
+#'                     }
 #' @param ... Further arguments passed to other methods.
 #'
 #' @details
@@ -52,6 +73,36 @@ run_wenorm <- function(df,
   df_wenorm    <- data.frame()
   df_base      <- data.frame()
   df_final     <- data.frame()
+
+  # --- v0.2.2 resampling knobs (back-compatible defaults) ---
+  resample_window <- if (!is.null(model_params$resample_window)) model_params$resample_window else 14
+  resample_pool   <- if (!is.null(model_params$resample_pool))   model_params$resample_pool   else "model"
+
+  # Resolve the data frame `wenorm()` should use as its TuanVu resampling pool.
+  # `input_df` is the per-site data BEFORE missing-response rows are dropped, so
+  # the "input" mode can retain met-only (NA-pollutant) rows.
+  resolve_resample_data <- function(input_df) {
+    if (is.data.frame(resample_pool)) {
+      # Separate meteorological record (same pool reused for every site).
+      pool <- resample_pool
+      if (!"datetime" %in% names(pool)) {
+        stop("model_params$resample_pool data frame must contain a 'datetime' column.")
+      }
+      for (v in model_params$predictor_variables) {
+        if (v %in% names(pool)) pool[[v]] <- as.numeric(pool[[v]])
+      }
+      return(pool)
+    } else if (identical(resample_pool, "input")) {
+      # Long met carried inside this site's own input (NA-pollutant rows kept).
+      return(input_df)
+    } else if (identical(resample_pool, "model")) {
+      # Default: wenorm() resamples from the modelling data itself.
+      return(NULL)
+    } else {
+      stop("model_params$resample_pool must be 'model', 'input', or a data.frame.")
+    }
+  }
+
   # Make sure 'response_variable' is a column in df_new
   if (model_params$response_variable %in% colnames(df_new)) {
     # Convert to numeric
@@ -109,7 +160,8 @@ run_wenorm <- function(df,
                                  predictor_variables = model_params$predictor_variables,
                                  constant_variables = model_params$constant_variables,
                                  num_iterations = model_params$num_iterations,
-                                 seed = model_params$seed
+                                 seed = model_params$seed,
+                                 resample_window = resample_window
               )
 
               df_wenorm  <- data.frame(my_df_wn[[3]][,c("datetime", model_params$response_variable, paste(model_params$response_variable, "_wn", sep =""))])
@@ -142,7 +194,8 @@ run_wenorm <- function(df,
                                  num_iterations = model_params$num_iterations,
                                  seed = model_params$seed,
                                  cpd = model_params$cpd,
-                                 window = model_params$window
+                                 window = model_params$window,
+                                 resample_window = resample_window
               )
 
               df_detrend  <- data.frame(my_df_wn[[3]][,c("datetime", model_params$response_variable, paste(model_params$response_variable, "_wn", sep =""))])
@@ -152,6 +205,11 @@ run_wenorm <- function(df,
             },
 
             "TuanVu" = {
+              # Resolve the resampling pool BEFORE missing_treat() drops the
+              # missing-response (e.g. met-only) rows, so the "input" mode can
+              # still see them.
+              resample_data <- resolve_resample_data(df_new)
+
               my_df <- df_new %>%
                 missing_treat(method = "rm",
                               response_variable = model_params$response_variable) %>%
@@ -181,7 +239,10 @@ run_wenorm <- function(df,
                 seed                = model_params$seed,
                 wenorm_method       = "TuanVu",
                 # no baseline/cpd stage for "TuanVu" -- documents that intent here too
-                cpd                 = FALSE
+                cpd                 = FALSE,
+                # v0.2.2 pool/window knobs
+                resample_window     = resample_window,
+                resample_data       = resample_data
               )
 
               df_wenorm <- data.frame(

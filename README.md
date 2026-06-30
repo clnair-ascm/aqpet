@@ -154,6 +154,59 @@ To streamline this workflow, the **aqpet** provides an ensemble function to effi
 data_WeNorm < - buildMod(list, params)
 ```
 
+### Configurable resampling window and pool (v0.2.2)
+
+From v0.2.2, the `wenorm_method = "TuanVu"` resampler (Vu et al., 2019) exposes two
+optional knobs, set as fields on your `params` / `setWeNorm()` list. **Both are
+back-compatible: with the defaults the output is identical to v0.2.1**, so existing
+scripts are unaffected — you only get new behaviour when you explicitly set a knob.
+
+• `resample_window` (integer, default `14`): half-width, in days, of the day-of-year
+  resampling window. `14` reproduces the canonical ±14-day window; larger values
+  widen the calendar window each replacement weather row may be drawn from. It
+  governs the "TuanVu" method and is accepted-but-unused by the other (non-windowed)
+  methods.
+
+• `resample_pool` (default `"model"`): where the resampler draws replacement weather
+  from. One of:
+  - `"model"` *(default)* — the modelling data itself (v0.2.1 behaviour).
+  - `"input"` — the full per-site input *before* missing-response rows are dropped,
+    so one frame can carry a long meteorological record alongside a pollutant column
+    that is `NA` outside the study period. The model trains only on rows with a
+    pollutant value, but the resampling pool keeps every row with valid weather.
+  - *a data frame* — a separate meteorological record (e.g. a multi-year MET pool, as
+    in Tong et al.'s ULEZ analysis), reused for every site. Must contain a `datetime`
+    column plus every resampled weather column.
+
+In all cases the resampling rule itself is unchanged (same hour-of-day, circular
+±`resample_window` days of year); pool rows with any missing weather value are dropped
+automatically so a draw never injects `NA` meteorology.
+
+```r
+params <- setWeNorm(wenorm_method = "TuanVu")
+
+# Default: pool = modelling period, ±14 days (identical to v0.2.1)
+res <- buildMod(data$list_df, params)
+
+# Knob 1 — wider window only
+params$resample_window <- 28                    # ±28 days
+res <- buildMod(data$list_df, params)
+
+# Knob 2, Option A — a separate, longer MET pool (a data frame with a
+# datetime column + the resampled weather columns), reused for every site
+params$resample_window <- 14
+params$resample_pool   <- london_met_2000_2024
+res <- buildMod(data$list_df, params)
+
+# Knob 2, Option B — long MET carried inside each site's own input;
+# pollutant is NA outside the study period, weather filled throughout
+params$resample_pool <- "input"
+res <- buildMod(data_with_long_met$list_df, params)
+```
+
+These fields are read directly off `params`, so no change to `setWeNorm()` is required
+to use them.
+
 ## Model performance and interoperability
 
 The `mod_stats` function offers a set of commonly used numeric model evaluation metrics. While it encompasses model statistics addressed by the openair package 'modStats' function, such as a factor or two (FAC2), normalised mean bias (NMB), root mean squared error (RMSE), the refined index of agreement (IOAr) (Willmott et al., 2012) — it further delineates systematic RMSE and unsystematic RMSE. 
@@ -237,6 +290,9 @@ ascm_trend(data, y_variable, add_ribbon = T, start_times)
 
 - LeDell, E.; Poirier, S.
   H2o automl: Scalable automatic machine learning. Proceedings of the AutoML Workshop at ICML: ICML; 2020
+
+- Vu, T.V.; Shi, Z.; Cheng, J.; Zhang, Q.; He, K.; Wang, S.; Harrison, R.M.
+  Assessing the impact of clean air action on air quality trends in Beijing using a machine learning technique. Atmospheric Chemistry and Physics; 2019; 19:11303-11314
 
 - Willmott, C.J.; Robeson, S.M.; Matsuura, K.
   A refined index of model performance. International Journal of climatology; 2012; 32:2088-2094

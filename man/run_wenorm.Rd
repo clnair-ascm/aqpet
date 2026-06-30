@@ -10,8 +10,29 @@ run_wenorm(df, model_params, ...)
 \item{df}{A data frame that contains the data to be processed and modeled.}
 
 \item{model_params}{A list that provides various model parameters such as the response variable,
-predictor variables, method for handling missing data, and various parameters
-for the modeling process.}
+                    predictor variables, method for handling missing data, and various parameters
+                    for the modeling process.
+
+                    v0.2.2 adds three optional fields (all back-compatible -- omit them and the
+                    behaviour is identical to v0.2.1):
+                    \itemize{
+                      \item `resample_window` -- integer half-width in days of the day-of-year
+                            resampling window (default 14). Governs the `wenorm_method = "TuanVu"`
+                            window; accepted-but-unused by the other methods.
+                      \item `resample_pool` -- where the TuanVu resampler draws replacement
+                            weather from. One of:
+                            \itemize{
+                              \item `"model"` (default) -- the modelling data itself (v0.2.1 behaviour).
+                              \item `"input"` -- the *full* input `df` BEFORE missing-response rows are
+                                    dropped. Lets you pass one frame that carries a long meteorological
+                                    record alongside a pollutant column that is NA outside the study
+                                    period: the model trains on the rows with a pollutant value, but the
+                                    resampling pool keeps every row with valid weather.
+                              \item a data frame -- a *separate* meteorological record (e.g. a multi-year
+                                    MET pool). Must contain a `datetime` column and every resampled
+                                    weather column.
+                            }
+                    }}
 
 \item{...}{Further arguments passed to other methods.}
 }
@@ -27,12 +48,12 @@ A named list containing:
 }
 \description{
 This function preprocesses the provided dataset, handles missing values, and trains a model based on
-the method provided in the model parameters. It offers three methods - "aml", "default", and "revised".
+the method provided in the model parameters. It offers four methods - "aml", "default", "revised", and "TuanVu".
 }
 \details{
 The function starts by checking and converting the response and predictor variables to numeric, if necessary.
 It then processes the data based on the method provided in `model_params`. The "aml" method processes
-and models the data differently than the "default" and "revised" methods. After preprocessing, the function
+and models the data differently than the "default", "revised", and "TuanVu" methods. After preprocessing, the function
 utilizes the `autoMod` function to train models, followed by the `wenorm` function to further process
 the dataset. The final output includes the trained model and processed datasets.
 }

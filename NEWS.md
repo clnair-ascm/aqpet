@@ -1,3 +1,57 @@
+# aqpet 0.2.2
+
+## New features
+
+* The `wenorm_method = "TuanVu"` resampler gains two optional, fully
+  back-compatible knobs, set as fields on `params` / `setWeNorm()`:
+
+  * `resample_window` (integer, default `14`) -- the half-width in days
+    of the day-of-year resampling window, previously hard-coded at
+    +/-14 days. Larger values widen the calendar window each
+    replacement weather row may be drawn from. Governs the "TuanVu"
+    method; accepted-but-unused by the other (non-windowed) methods.
+
+  * `resample_pool` (default `"model"`) -- where replacement weather is
+    drawn from. One of `"model"` (the modelling data itself, i.e. the
+    v0.2.1 behaviour), `"input"` (the full per-site input *before*
+    missing-response rows are dropped, so one frame can carry a long
+    meteorological record alongside a pollutant column that is `NA`
+    outside the study period), or a data frame (a separate multi-year
+    MET pool, reused for every site -- the Tong et al. (2025) ULEZ
+    style). A supplied pool must contain a `datetime` column and every
+    resampled weather column; pool rows with any missing weather value
+    are dropped automatically so a draw never injects `NA` met.
+
+## Implementation
+
+* `wenorm()` gains `resample_window` and `resample_data` arguments, and
+  its internal `build_candidate_index()` is generalised from a
+  self-index to a `(target, pool)` cross-index with a `window`
+  argument. The TuanVu path now resolves a pool (defaulting to the
+  modelling `data`), builds the index against it, and draws the
+  resampled weather columns from the pool. Only the resampled weather
+  columns are exported to the parallel workers, so a large multi-year
+  pool is not copied in full to every worker.
+
+* `run_wenorm()` reads `resample_window` / `resample_pool` off
+  `model_params` and resolves the pool *before* `missing_treat()` drops
+  the NA-response rows (`"model"` -> the modelling data; `"input"` ->
+  the full pre-`missing_treat` input; a data frame -> itself), then
+  threads `resample_window` / `resample_data` into the `wenorm()` calls.
+
+* `buildMod()` documents the new `params` fields and validates them
+  once, up front, for a clear early error instead of one buried in the
+  per-site loop.
+
+## Backward compatibility
+
+* With the defaults (`resample_window = 14`, `resample_pool = "model"`)
+  the output is identical to v0.2.1. Verified on the Marylebone
+  modelling frame (2018-2019): the new candidate index produced
+  identical candidate sets for all 17,518 rows. No change to the
+  "default"/"revised" resampling paths or to `wenorm()`'s return
+  structure.
+
 # aqpet 0.2.1
 
 ## Performance

@@ -18,8 +18,25 @@
 #' @param window Numeric. Specifies the window size for smoothing. Default is 10.
 #' @param wenorm_method One of "default" (resample_variables reshuffled
 #'   across randomly chosen rows from the whole series) or "TuanVu" (Vu et
-#'   al. 2019: resample_variables drawn from rows within +/-14 days of year
-#'   and the same hour-of-day; skips the baseline/cpd stages below entirely).
+#'   al. 2019: resample_variables drawn from rows within +/-`resample_window`
+#'   days of year and the same hour-of-day; skips the baseline/cpd stages
+#'   below entirely).
+#' @param resample_window Integer half-width, in days, of the day-of-year
+#'   resampling window used by `wenorm_method = "TuanVu"`. Default 14 (the
+#'   +/-14-day window of Vu et al. 2019, and the value hard-coded in v0.2.1).
+#'   A larger value widens the calendar window each replacement weather row
+#'   may be drawn from; e.g. `resample_window = 28` doubles it. Accepted but
+#'   unused by the other (non-windowed) methods, so the knob is available
+#'   regardless of `wenorm_method`.
+#' @param resample_data Optional data frame giving a *separate* meteorological
+#'   resampling pool for `wenorm_method = "TuanVu"`. The same hour-of-day /
+#'   +/-`resample_window`-day rule is applied, but the replacement weather is
+#'   drawn from THIS data frame instead of from `data`. It must contain a
+#'   `datetime` column and every resampled weather column (the
+#'   `predictor_variables` that are not `constant_variables`). Rows with any
+#'   missing weather value are dropped from the pool automatically. When NULL
+#'   (default) the pool is `data` itself, reproducing v0.2.1 behaviour exactly.
+#'   Ignored by the other methods.
 #'
 #'   Performance note (v0.2.1): for "TuanVu", the original implementation
 #'   recomputed, for every single row, a fresh O(N) distance scan over the
@@ -33,6 +50,14 @@
 #'   Results are statistically equivalent to the original (same +/-14-day,
 #'   same-hour candidate pool; same fallback rules), just computed far less
 #'   redundantly.
+#'
+#'   Pool/window knobs (v0.2.2): `resample_window` generalises the previously
+#'   hard-coded +/-14-day window, and `resample_data` lets the candidate
+#'   index be built against -- and weather drawn from -- a separate, typically
+#'   longer, meteorological record (as in Tong et al. 2025's ULEZ analysis,
+#'   which resamples from a multi-year MET pool). With the defaults
+#'   (`resample_window = 14`, `resample_data = NULL`) behaviour is byte-for-byte
+#'   the v0.2.1 result.
 #' @return A list containing the final_data (all data frames combined) and summary_data (data summarized by datetime).
 #' @export
 #' @examples
@@ -50,6 +75,8 @@ wenorm <- function(data,
                    cpd = T,
                    window = 10,
                    wenorm_method = "default",
+                   resample_window = 14,
+                   resample_data = NULL,
                    ...) {
 
     # Check input
@@ -59,6 +86,10 @@ wenorm <- function(data,
 
     if (!(is.numeric(num_iterations) & length(num_iterations) == 1 & num_iterations > 0 & floor(num_iterations) == num_iterations)) {
       stop("num_iterations must be a single positive integer.")
+    }
+
+    if (!(is.numeric(resample_window) & length(resample_window) == 1 & resample_window > 0 & floor(resample_window) == resample_window)) {
+      stop("resample_window must be a single positive integer (days).")
     }
 
 
@@ -81,50 +112,67 @@ wenorm <- function(data,
 
   # --- "TuanVu" candidate-index precomputation (done once, not per-iteration) ---
   #
-  # For every row we need all rows that share its hour-of-day and fall within
-  # a circular +/-14-day window of its day-of-year. Build that lookup once
-  # here via a per-hour binary search instead of, as before, re-scanning the
-  # whole series for every row on every Monte Carlo iteration.
-  build_candidate_index <- function(doy, hr) {
+  # For every TARGET row we need all POOL rows that share its hour-of-day and
+  # fall within a circular +/-`window`-day window of its day-of-year. Build
+  # that lookup once here via a per-hour binary search instead of, as before,
+  # re-scanning the whole series for every row on every Monte Carlo iteration.
+  #
+  # The target series and the resampling pool are kept separate so that the
+  # pool can be a different (e.g. longer) met record than the data being
+  # normalised. When they are the same data frame and `window = 14`, this
+  # reproduces the v0.2.1 self-index exactly.
+  build_candidate_index <- function(target_doy, target_hr,
+                                    pool_doy, pool_hr,
+                                    window = 14) {
 
-    n <- length(doy)
-    idx_all <- seq_len(n)
-    by_hour <- split(idx_all, hr)
-    candidates <- vector("list", n)
+    n_t        <- length(target_doy)
+    pool_idx   <- seq_along(pool_doy)
+    pool_by_h  <- split(pool_idx, pool_hr)
+    candidates <- vector("list", n_t)
 
-    for (rows_h in by_hour) {
+    # +/- (window + 0.5) makes the inclusive <= window day boundary exact under
+    # findInterval()'s half-open interval semantics.
+    half <- window + 0.5
 
-      doy_h <- doy[rows_h]
-      ord <- order(doy_h)
-      rows_sorted <- rows_h[ord]
+    for (h in unique(target_hr)) {
+
+      rows_t_h <- which(target_hr == h)
+      pool_h   <- pool_by_h[[as.character(h)]]
+      if (is.null(pool_h) || length(pool_h) == 0L) next  # no same-hour pool -> fallback below
+
+      doy_h       <- pool_doy[pool_h]
+      ord         <- order(doy_h)
+      rows_sorted <- pool_h[ord]
       doy_sorted  <- doy_h[ord]
 
-      # Triplicate the per-hour timeline (-366, +0, +366) so a circular
-      # +/-14-day window never needs special-casing at the year boundary
-      # (e.g. day 3 correctly matches day 364 of the previous "lap").
+      # Triplicate the per-hour pool timeline (-366, +0, +366) so a circular
+      # window never needs special-casing at the year boundary (e.g. day 3
+      # correctly matches day 364 of the previous "lap").
       doy_ext  <- c(doy_sorted - 366, doy_sorted, doy_sorted + 366)
       rows_ext <- rep(rows_sorted, 3)
       ord_ext  <- order(doy_ext)
       doy_ext  <- doy_ext[ord_ext]
       rows_ext <- rows_ext[ord_ext]
 
-      # +/- 0.5 offsets make the inclusive <= 14 day boundary exact under
-      # findInterval()'s half-open interval semantics.
-      lo_pos <- findInterval(doy_sorted - 14.5, doy_ext) + 1L
-      hi_pos <- findInterval(doy_sorted + 14.5, doy_ext)
+      td     <- target_doy[rows_t_h]
+      lo_pos <- findInterval(td - half, doy_ext) + 1L
+      hi_pos <- findInterval(td + half, doy_ext)
 
-      for (k in seq_along(rows_sorted)) {
-        candidates[[rows_sorted[k]]] <- rows_ext[lo_pos[k]:hi_pos[k]]
+      for (k in seq_along(rows_t_h)) {
+        if (lo_pos[k] <= hi_pos[k]) {
+          candidates[[rows_t_h[k]]] <- rows_ext[lo_pos[k]:hi_pos[k]]
+        }
       }
     }
 
-    # Defensive fallbacks mirroring the original row-loop's rules. In
-    # practice every row always matches itself (distance 0 from its own
-    # day-of-year), so these branches should not trigger.
+    # Defensive fallbacks mirroring the original row-loop's rules. A target row
+    # with no in-window pool match for its hour falls back to all same-hour pool
+    # rows, then to the whole pool. (For a self-index every row matches itself,
+    # so these branches do not trigger.)
     empty <- which(lengths(candidates) == 0L)
     for (row_i in empty) {
-      idx <- which(hr == hr[row_i])
-      if (length(idx) == 0L) idx <- idx_all
+      idx <- pool_idx[pool_hr == target_hr[row_i]]
+      if (length(idx) == 0L) idx <- pool_idx
       candidates[[row_i]] <- idx
     }
 
@@ -133,28 +181,65 @@ wenorm <- function(data,
 
   if (identical(wenorm_method, "TuanVu")) {
 
-    work_data <- data
-    work_data$doy <- as.integer(format(work_data$datetime, "%j"))
-    work_data$hr  <- as.integer(format(work_data$datetime, "%H"))
+    data <- as.data.frame(data)
 
-    candidate_idx      <- build_candidate_index(work_data$doy, work_data$hr)
-    new_data_template  <- work_data[, c(constant_variables, response_variable), drop = FALSE]
+    # --- target rows: the observations to be weather-normalised ---
+    target_doy <- as.integer(format(data$datetime, "%j"))
+    target_hr  <- as.integer(format(data$datetime, "%H"))
+
+    # --- resampling pool: where replacement weather is drawn from ---
+    if (is.null(resample_data)) {
+      pool <- data                                   # v0.2.1 behaviour
+    } else {
+      if (!is.data.frame(resample_data)) {
+        stop("resample_data must be a data.frame (the meteorological resampling pool).")
+      }
+      pool <- as.data.frame(resample_data)
+      if (!"datetime" %in% names(pool)) {
+        stop("resample_data must contain a 'datetime' column.")
+      }
+      miss <- setdiff(resample_variables, names(pool))
+      if (length(miss)) {
+        stop("resample_data is missing the resampled weather column(s): ",
+             paste(miss, collapse = ", "))
+      }
+    }
+
+    # Keep only pool rows with complete weather so a draw never injects NA met.
+    ok_pool <- stats::complete.cases(pool[, resample_variables, drop = FALSE])
+    pool    <- pool[ok_pool, , drop = FALSE]
+    if (nrow(pool) == 0L) {
+      stop("Resampling pool has no rows with complete weather variables.")
+    }
+
+    pool_doy <- as.integer(format(pool$datetime, "%j"))
+    pool_hr  <- as.integer(format(pool$datetime, "%H"))
+
+    candidate_idx     <- build_candidate_index(target_doy, target_hr,
+                                               pool_doy, pool_hr,
+                                               window = resample_window)
+    new_data_template <- data[, c(constant_variables, response_variable), drop = FALSE]
+
+    # Only the resampled weather columns are needed inside the parallel loop;
+    # subset once so a large (e.g. multi-year) pool isn't exported in full to
+    # every worker.
+    pool_weather <- pool[, resample_variables, drop = FALSE]
   }
 
   randomized_dfs1 <- foreach(iter = 1:num_iterations, .packages = "dplyr") %dopar% {
 
     if (identical(wenorm_method, "TuanVu")) {
 
-      # One sampled candidate row per row, drawn from the precomputed
-      # index, then a single vectorised assignment of the resampled
-      # weather columns (replacing the original's row-by-row
+      # One sampled candidate row per target row, drawn from the precomputed
+      # index, then a single vectorised assignment of the resampled weather
+      # columns FROM THE POOL (replacing the original's row-by-row
       # new_data[row_i, ...] <- ... assignment inside an O(N) row loop).
       sampled_rows <- vapply(candidate_idx, function(idx) {
         if (length(idx) == 1L) idx else idx[sample.int(length(idx), 1L)]
       }, integer(1))
 
       new_data <- new_data_template
-      new_data[, resample_variables] <- work_data[sampled_rows, resample_variables]
+      new_data[, resample_variables] <- pool_weather[sampled_rows, , drop = FALSE]
 
       return(new_data)
 

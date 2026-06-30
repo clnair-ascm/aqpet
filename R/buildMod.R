@@ -4,6 +4,23 @@
 #'
 #' @param mylist A list of data frames to process.
 #' @param params A list of parameters specifying details like predictor variables, output directory, wenorm method, etc.
+#'
+#'   v0.2.2 recognises three optional resampling fields on `params` (all back-compatible --
+#'   leave them off and behaviour is identical to v0.2.1):
+#'   \itemize{
+#'     \item `params$resample_window` -- integer half-width in days of the day-of-year resampling
+#'           window (default 14). Governs the `wenorm_method = "TuanVu"` window; accepted-but-unused
+#'           by the other methods, so the knob is available regardless of method.
+#'     \item `params$resample_pool` -- where the TuanVu resampler draws replacement weather from:
+#'           \itemize{
+#'             \item `"model"` (default) -- the modelling data itself (v0.2.1 behaviour).
+#'             \item `"input"` -- the full per-site input BEFORE missing-response rows are dropped,
+#'                   so one frame can carry a long meteorological record alongside a pollutant column
+#'                   that is NA outside the study period.
+#'             \item a data frame -- a separate meteorological record (e.g. a multi-year MET pool),
+#'                   reused for every site. Must contain `datetime` plus every resampled weather column.
+#'           }
+#'   }
 #' @param start_index The index at which to start processing the list of data frames. Default is 1.
 #' @param end_index The index at which to end processing the list of data frames. If NULL, it defaults to the length of the input list.
 #' @param ... Other arguments passed to the function.
@@ -19,6 +36,16 @@
 #' \dontrun{
 #' # Example usage with dummy data and parameters:
 #' results <- buildMod(df_list, params)
+#'
+#' # Wider window + a separate multi-year MET pool (Tong et al. 2025 style):
+#' params$wenorm_method  <- "TuanVu"
+#' params$resample_window <- 14
+#' params$resample_pool   <- london_met_2000_2024   # data frame: datetime + weather cols
+#' results <- buildMod(df_list, params)
+#'
+#' # Or carry the long met inside each site's own input (pollutant NA outside study period):
+#' params$resample_pool <- "input"
+#' results <- buildMod(df_list_with_long_met, params)
 #' }
 #'
 #' @export
@@ -28,6 +55,30 @@ buildMod <- function(mylist,
                      start_index = 1,
                      end_index = NULL,
                      ...) {
+
+  # --- validate the v0.2.2 resampling knobs ONCE, up front (clear early error
+  #     instead of one buried inside the per-site tryCatch loop) ---
+  if (!is.null(params$resample_window)) {
+    rw <- params$resample_window
+    if (!(is.numeric(rw) && length(rw) == 1 && rw > 0 && floor(rw) == rw)) {
+      stop("params$resample_window must be a single positive integer (days).")
+    }
+  }
+  if (!is.null(params$resample_pool)) {
+    rp <- params$resample_pool
+    if (is.data.frame(rp)) {
+      resample_variables <- setdiff(params$predictor_variables,
+                                    c(params$constant_variables, "datetime"))
+      needed <- c("datetime", resample_variables)
+      miss   <- setdiff(needed, names(rp))
+      if (length(miss)) {
+        stop("params$resample_pool data frame is missing required column(s): ",
+             paste(miss, collapse = ", "))
+      }
+    } else if (!(is.character(rp) && length(rp) == 1 && rp %in% c("model", "input"))) {
+      stop("params$resample_pool must be 'model', 'input', or a data.frame.")
+    }
+  }
 
   suppressWarnings({
 
