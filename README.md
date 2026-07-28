@@ -154,14 +154,12 @@ To streamline this workflow, the **aqpet** provides an ensemble function to effi
 data_WeNorm < - buildMod(list, params)
 ```
 
-### Configurable resampling window and pool (v0.2.2)
+### Configurable resampling window and pool (v0.2.2) (gratefully acknowledge Dr. Nabeel Akram’s contribution to the development of this functionality!)
 
 From v0.2.2, the `wenorm_method = "TuanVu"` resampler (Vu et al., 2019) exposes two
 optional knobs, set as fields on your `params` / `setWeNorm()` list. **Both are
 back-compatible: with the defaults the output is identical to v0.2.1**, so existing
 scripts are unaffected — you only get new behaviour when you explicitly set a knob.
-
-(We gratefully acknowledge Dr. Nabeel Akram’s contribution to the development of this functionality!)
 
 • `resample_window` (integer, default `14`): half-width, in days, of the day-of-year
   resampling window. `14` reproduces the canonical ±14-day window; larger values
