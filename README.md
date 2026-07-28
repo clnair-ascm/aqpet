@@ -182,6 +182,8 @@ In all cases the resampling rule itself is unchanged (same hour-of-day, circular
 ±`resample_window` days of year); pool rows with any missing weather value are dropped
 automatically so a draw never injects `NA` meteorology.
 
+We gratefully acknowledge Dr. Nabeel Akram’s contribution to the development of this functionality.
+
 ```r
 params <- setWeNorm(wenorm_method = "TuanVu")
 
