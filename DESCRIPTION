@@ -1,33 +1,34 @@
 Package: aqpet
 Type: Package
 Title: aqpet: Air Quality Policy Evaluation Toolkit
-Version: 0.1.0
+Version: 0.2.3
 Author: Yuqing Dai
 Maintainer: Yuqing Dai <yxd598@bham.ac.uk>
             Bowen Liu <b.liu.1@bham.ac.uk>
             Chengxu Tong <cxt039@student.bham.ac.uk>
-Description: The 'aqpet' package provides a comprehensive toolkit for streamlined analysis of policy interventions, 
-             utilizing 'h2o' for automated machine learning, weather normalization approaches to isolate human-related trends, 
-             and ASCM for counterfactual comparison between policy-implementing and control cities. Data are typically 
-             regular time series air quality and meteorological data. This package enables precise and efficient air 
+Description: The 'aqpet' package provides a comprehensive toolkit for streamlined analysis of policy interventions,
+             utilizing 'h2o' for automated machine learning, weather normalization approaches to isolate human-related trends,
+             and ASCM for counterfactual comparison between policy-implementing and control cities. Data are typically
+             regular time series air quality and meteorological data. This package enables precise and efficient air
              quality policy evaluation, aiding informed urban air quality management.
 License: GPL (>= 2)
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.2.3
-Depends: 
+Depends:
     R (>= 4.3.3),
     tidymodels,
     tidyverse
-Suggests: 
+Suggests:
     knitr,
     rmarkdown
 VignetteBuilder: knitr
-Imports: 
+Imports:
     bsts,
     changepoint,
     devtools,
     doParallel,
+    doRNG,
     dplyr,
     foreach,
     h2o,
