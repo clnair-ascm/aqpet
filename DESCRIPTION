@@ -3,7 +3,7 @@ Type: Package
 Title: aqpet: Air Quality Policy Evaluation Toolkit
 Version: 0.2.3
 Author: Yuqing Dai
-Maintainer: Yuqing Dai <yxd598@bham.ac.uk>
+Maintainer: Yuqing Dai <y.dai.2@bham.ac.uk>
             Bowen Liu <b.liu.1@bham.ac.uk>
             Chengxu Tong <cxt039@student.bham.ac.uk>
 Description: The 'aqpet' package provides a comprehensive toolkit for streamlined analysis of policy interventions,
