@@ -161,6 +161,8 @@ optional knobs, set as fields on your `params` / `setWeNorm()` list. **Both are
 back-compatible: with the defaults the output is identical to v0.2.1**, so existing
 scripts are unaffected — you only get new behaviour when you explicitly set a knob.
 
+(We gratefully acknowledge Dr. Nabeel Akram’s contribution to the development of this functionality!)
+
 • `resample_window` (integer, default `14`): half-width, in days, of the day-of-year
   resampling window. `14` reproduces the canonical ±14-day window; larger values
   widen the calendar window each replacement weather row may be drawn from. It
@@ -181,8 +183,6 @@ scripts are unaffected — you only get new behaviour when you explicitly set a 
 In all cases the resampling rule itself is unchanged (same hour-of-day, circular
 ±`resample_window` days of year); pool rows with any missing weather value are dropped
 automatically so a draw never injects `NA` meteorology.
-
-We gratefully acknowledge Dr. Nabeel Akram’s contribution to the development of this functionality.
 
 ```r
 params <- setWeNorm(wenorm_method = "TuanVu")
