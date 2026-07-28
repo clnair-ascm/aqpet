@@ -4,12 +4,29 @@
 \alias{buildMod}
 \title{Building Models Using WENORM}
 \usage{
-buildMod(df, params, start_index = 1, end_index = NULL, ...)
+buildMod(mylist, params, start_index = 1, end_index = NULL, ...)
 }
 \arguments{
-\item{df}{A list of data frames to process.}
+\item{mylist}{A list of data frames to process.}
 
-\item{params}{A list of parameters specifying details like predictor variables, output directory, wenorm method, etc.}
+\item{params}{A list of parameters specifying details like predictor variables, output directory, wenorm method, etc.
+
+  v0.2.2 recognises three optional resampling fields on `params` (all back-compatible --
+  leave them off and behaviour is identical to v0.2.1):
+  \itemize{
+    \item `params$resample_window` -- integer half-width in days of the day-of-year resampling
+          window (default 14). Governs the `wenorm_method = "TuanVu"` window; accepted-but-unused
+          by the other methods, so the knob is available regardless of method.
+    \item `params$resample_pool` -- where the TuanVu resampler draws replacement weather from:
+          \itemize{
+            \item `"model"` (default) -- the modelling data itself (v0.2.1 behaviour).
+            \item `"input"` -- the full per-site input BEFORE missing-response rows are dropped,
+                  so one frame can carry a long meteorological record alongside a pollutant column
+                  that is NA outside the study period.
+            \item a data frame -- a separate meteorological record (e.g. a multi-year MET pool),
+                  reused for every site. Must contain `datetime` plus every resampled weather column.
+          }
+  }}
 
 \item{start_index}{The index at which to start processing the list of data frames. Default is 1.}
 
@@ -27,9 +44,19 @@ This function processes and builds models using the `wenorm` method based on pro
 \dontrun{
 # Example usage with dummy data and parameters:
 results <- buildMod(df_list, params)
+
+# Wider window + a separate multi-year MET pool (Tong et al. 2025 style):
+params$wenorm_method  <- "TuanVu"
+params$resample_window <- 14
+params$resample_pool   <- london_met_2000_2024   # data frame: datetime + weather cols
+results <- buildMod(df_list, params)
+
+# Or carry the long met inside each site's own input (pollutant NA outside study period):
+params$resample_pool <- "input"
+results <- buildMod(df_list_with_long_met, params)
 }
 
 }
 \author{
-[Yuqing Dai]
+[Yuqing Dai, Chengxu Tong]
 }
