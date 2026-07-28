@@ -155,7 +155,7 @@ data_WeNorm < - buildMod(list, params)
 ```
 
 ### Configurable resampling window and pool (v0.2.2) 
-##### We gratefully acknowledge Dr. Nabeel Akram’s contribution to the development of this functionality!
+#### We gratefully acknowledge Dr. Nabeel Akram’s contribution to the development of this functionality!
 
 From v0.2.2, the `wenorm_method = "TuanVu"` resampler (Vu et al., 2019) exposes two
 optional knobs, set as fields on your `params` / `setWeNorm()` list. **Both are
