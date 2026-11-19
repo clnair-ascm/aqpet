@@ -46,7 +46,7 @@
 #'   \item `aqmod`: A list that contains details about the trained model, including model statistics and a leaderboard.
 #'}
 #'
-#' @author [Yuqing Dai]
+#' @author [Yuqing Dai, Nabeel Akram]
 #'
 #' @examples
 #' \dontrun{
