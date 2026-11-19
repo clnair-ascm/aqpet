@@ -5,7 +5,7 @@
 #' 2. Set Weather Normalization Parameters
 #' 3. Set Weather Normalization Parameters
 #'
-#' @author [Yuqing Dai, Chengxu Tong]
+#' @author [Yuqing Dai, Chengxu Tong, Nabeel Akram]
 #'
 #'
 #'
