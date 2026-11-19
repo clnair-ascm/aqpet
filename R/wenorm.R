@@ -1,4 +1,4 @@
-#' @author \Yuqing \Dai
+#' @author \Yuqing Dai, Chengxu Tong, Nabeel Akram
 #'
 #' Perform Weather Normalization
 #'
