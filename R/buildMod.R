@@ -30,7 +30,7 @@
 #' @importFrom purrr compact
 #' @importFrom base tryCatch Sys.time
 #'
-#' @author [Yuqing Dai, Chengxu Tong]
+#' @author [Yuqing Dai, Chengxu Tong, Nabeel Akram]
 #'
 #' @examples
 #' \dontrun{
